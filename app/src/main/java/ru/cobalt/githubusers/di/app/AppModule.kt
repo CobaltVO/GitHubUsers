@@ -8,7 +8,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.cobalt.githubusers.api.UserApi
 import ru.cobalt.githubusers.repo.UserRepository
-import ru.cobalt.githubusers.room.UserDatabase
+import ru.cobalt.githubusers.repo.room.UserDatabase
 import javax.inject.Singleton
 
 @Module

@@ -5,7 +5,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import ru.cobalt.githubusers.model.User
-import ru.cobalt.githubusers.room.UserDao
+import ru.cobalt.githubusers.repo.room.UserDao
 
 class ListOfUsersCallback(private val userDao: UserDao) : Callback<List<User>> {
 

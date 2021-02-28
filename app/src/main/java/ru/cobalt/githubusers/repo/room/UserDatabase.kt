@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.room
+package ru.cobalt.githubusers.repo.room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
