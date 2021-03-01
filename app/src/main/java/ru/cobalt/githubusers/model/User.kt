@@ -13,4 +13,7 @@ data class User(
 
     @SerializedName("avatar_url")
     val photoUrl: String,
+
+    @SerializedName("html_url")
+    val userPageUrl: String,
 )

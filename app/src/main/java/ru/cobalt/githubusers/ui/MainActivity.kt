@@ -1,6 +1,9 @@
 package ru.cobalt.githubusers.ui
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
@@ -24,19 +27,24 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         viewModel = UserViewModel(userRepository)
         val adapter = UserAdapter()
         listOfUsers.adapter = adapter
-        viewModel.users.observe(this) { adapter.update(it) }
-
-//        val dataSource = UserDataSource(this, App.userRepository)
-//        val config = PagedList.Config.Builder()
-//            .setEnablePlaceholders(false)
-//            .setPageSize(10)
-//            .build()
-//        val list = PagedList.Builder(dataSource, config)
-//            .setFetchExecutor(Executors.newSingleThreadExecutor())
-//            .setNotifyExecutor { Handler(Looper.getMainLooper()).post(it) }
-//            .build()
-//        listOfUsers.adapter = UserAdapter(DiffUtilUserCallback()).apply { submitList(list) }
+        viewModel.users.observe(this) {
+            adapter.update(it)
+            Toast.makeText(this, "Updated: ${viewModel.users.value?.size}", Toast.LENGTH_SHORT)
+                .show()
+        }
+        viewModel.update()
 
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_item_delete_all -> viewModel.deleteAll()
+        }
+        return super.onOptionsItemSelected(item)
+    }
 }

@@ -2,10 +2,15 @@ package ru.cobalt.githubusers.repo
 
 import ru.cobalt.githubusers.api.UserApi
 import ru.cobalt.githubusers.repo.room.UserDao
+import java.util.concurrent.ExecutorService
 
-class UserRepository(private val userApi: UserApi, private val userDao: UserDao) {
+class UserRepository(
+    private val executor: ExecutorService,
+    private val userApi: UserApi,
+    private val userDao: UserDao
+) {
 
-    private val callback = ListOfUsersCallback(userDao)
+    private val callback = ListOfUsersCallback(executor, userDao)
 
     val users = userDao.getAll()
 
@@ -14,4 +19,5 @@ class UserRepository(private val userApi: UserApi, private val userDao: UserDao)
     fun load(usersSinceId: Long, usersPerPage: Int) =
         userApi.getAll(usersSinceId, usersPerPage).enqueue(callback)
 
+    fun deleteAll() = executor.execute { userDao.deleteAll() }
 }

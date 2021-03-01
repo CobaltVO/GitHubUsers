@@ -9,6 +9,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import ru.cobalt.githubusers.api.UserApi
 import ru.cobalt.githubusers.repo.UserRepository
 import ru.cobalt.githubusers.repo.room.UserDatabase
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 @Module
@@ -39,7 +41,14 @@ class AppModule(var appContext: Context) {
 
     @Provides
     @Singleton
-    fun provideUserRepository(userApi: UserApi, userDatabase: UserDatabase) =
-        UserRepository(userApi, userDatabase.userDao)
+    fun provideExecutorService(): ExecutorService = Executors.newSingleThreadExecutor()
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        executorService: ExecutorService,
+        userApi: UserApi,
+        userDatabase: UserDatabase
+    ) = UserRepository(executorService, userApi, userDatabase.userDao)
 
 }

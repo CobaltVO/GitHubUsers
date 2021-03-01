@@ -6,11 +6,15 @@ import retrofit2.Callback
 import retrofit2.Response
 import ru.cobalt.githubusers.model.User
 import ru.cobalt.githubusers.repo.room.UserDao
+import java.util.concurrent.ExecutorService
 
-class ListOfUsersCallback(private val userDao: UserDao) : Callback<List<User>> {
+class ListOfUsersCallback(
+    private val executor: ExecutorService,
+    private val userDao: UserDao
+) : Callback<List<User>> {
 
     override fun onResponse(call: Call<List<User>>, response: Response<List<User>>) {
-        if (response.isSuccessful) response.body()?.let { Thread { userDao.add(it) }.start() }
+        if (response.isSuccessful) response.body()?.let { executor.execute { userDao.add(it) } }
         else response.errorBody()?.let { Log.d("wtf", it.string()) }
     }
 

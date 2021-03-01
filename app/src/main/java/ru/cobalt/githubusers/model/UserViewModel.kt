@@ -9,4 +9,13 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     init {
         userRepository.init()
     }
+
+    fun update() {
+        val id = userRepository.users.value?.last()?.id ?: 0
+        userRepository.load(id, 10)
+    }
+
+    fun deleteAll() {
+        userRepository.deleteAll()
+    }
 }
