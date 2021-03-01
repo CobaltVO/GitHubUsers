@@ -36,5 +36,6 @@ class UserAdapter() : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
 
     fun update(newList: List<User>) {
         list = newList
+        notifyDataSetChanged()
     }
 }
