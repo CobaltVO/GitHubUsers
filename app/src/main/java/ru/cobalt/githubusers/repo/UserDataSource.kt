@@ -15,7 +15,7 @@ class UserDataSource(
             .subscribe(
                 {
                     callback.onResult(it)
-                    log("${it.size} initial users were loaded")
+                    log("${it.size} initial users were loaded into list")
                 },
                 { log("Can't load initial users: ${it.message}") })
     }
@@ -25,7 +25,7 @@ class UserDataSource(
             .subscribe(
                 {
                     callback.onResult(it)
-                    log("${it.size} new users were loaded")
+                    log("${it.size} new users were loaded into list")
                 },
                 { log("Can't load new users: ${it.message}") })
     }

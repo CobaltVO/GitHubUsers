@@ -14,7 +14,7 @@ class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
     private val dataSource = UserDataSource(userRepository)
     private val listConfig = PagedList.Config.Builder()
         .setEnablePlaceholders(false)
-        .setPageSize(30)
+        .setPageSize(100)
         .build()
     private val list = PagedList.Builder(dataSource, listConfig)
         .setFetchExecutor(Executors.newSingleThreadExecutor())

@@ -20,23 +20,23 @@ class UserRepository(
 
     private fun downloadAndSave() =
         userApi.getAll()
-            .subscribeOn(Schedulers.io())
             .doOnSuccess { saveToDatabase(it) }
             .doAfterSuccess { log("${it.size} new users were download from server") }
 
     private fun downloadAndSave(idFrom: Long, count: Int) =
         userApi.get(idFrom, count)
-            .subscribeOn(Schedulers.io())
             .doOnSuccess { saveToDatabase(it) }
             .doAfterSuccess { log("${it.size} new users were download from server") }
 
     fun get(): Maybe<List<User>> =
         Single.concat(userDao.getAll(), downloadAndSave())
+            .subscribeOn(Schedulers.io())
             .filter { list -> list.isNotEmpty() }
             .firstElement()
 
     fun get(idFrom: Long, count: Int): Maybe<List<User>> =
         Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, count))
+            .subscribeOn(Schedulers.io())
             .filter { list -> list.isNotEmpty() }
             .firstElement()
 
