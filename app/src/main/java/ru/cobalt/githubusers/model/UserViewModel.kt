@@ -1,21 +1,26 @@
 package ru.cobalt.githubusers.model
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.ViewModel
+import androidx.paging.PagedList
+import ru.cobalt.githubusers.repo.DiffUtilUserCallback
+import ru.cobalt.githubusers.repo.UserDataSource
 import ru.cobalt.githubusers.repo.UserRepository
+import ru.cobalt.githubusers.ui.PagedUserAdapter
+import java.util.concurrent.Executors
 
 class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
-    val users = userRepository.users
+    private val dataSource = UserDataSource(userRepository)
+    private val listConfig = PagedList.Config.Builder()
+        .setEnablePlaceholders(false)
+        .setPageSize(30)
+        .build()
+    private val list = PagedList.Builder(dataSource, listConfig)
+        .setFetchExecutor(Executors.newSingleThreadExecutor())
+        .setNotifyExecutor { Handler(Looper.getMainLooper()).post(it) }
+        .build()
+    val adapter = PagedUserAdapter(DiffUtilUserCallback()).apply { submitList(list) }
 
-    init {
-        userRepository.init()
-    }
-
-    fun update() {
-        val id = userRepository.users.value?.last()?.id ?: 0
-        userRepository.load(id, 10)
-    }
-
-    fun deleteAll() {
-        userRepository.deleteAll()
-    }
+    fun deleteAll() = userRepository.deleteAll()
 }

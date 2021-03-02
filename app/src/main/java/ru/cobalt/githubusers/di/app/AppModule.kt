@@ -5,12 +5,12 @@ import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import ru.cobalt.githubusers.api.UserApi
 import ru.cobalt.githubusers.repo.UserRepository
 import ru.cobalt.githubusers.repo.room.UserDatabase
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 @Module
@@ -33,6 +33,7 @@ class AppModule(var appContext: Context) {
         Retrofit.Builder()
             .baseUrl("https://api.github.com/")
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
             .build()
 
     @Provides
@@ -41,14 +42,10 @@ class AppModule(var appContext: Context) {
 
     @Provides
     @Singleton
-    fun provideExecutorService(): ExecutorService = Executors.newSingleThreadExecutor()
-
-    @Provides
-    @Singleton
     fun provideUserRepository(
         executorService: ExecutorService,
         userApi: UserApi,
         userDatabase: UserDatabase
-    ) = UserRepository(executorService, userApi, userDatabase.userDao)
+    ) = UserRepository(userApi, userDatabase.userDao)
 
 }

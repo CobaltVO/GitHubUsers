@@ -1,23 +1,44 @@
 package ru.cobalt.githubusers.repo
 
+import io.reactivex.Maybe
+import io.reactivex.Single
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import ru.cobalt.githubusers.api.UserApi
+import ru.cobalt.githubusers.model.User
 import ru.cobalt.githubusers.repo.room.UserDao
-import java.util.concurrent.ExecutorService
+import ru.cobalt.githubusers.utils.log
 
 class UserRepository(
-    private val executor: ExecutorService,
     private val userApi: UserApi,
     private val userDao: UserDao
 ) {
+    private fun saveToDatabase(list: List<User>): Disposable =
+        userDao.add(list)
+            .subscribeOn(Schedulers.io())
+            .subscribe { log("${list.size} new users were saved to database") }
 
-    private val callback = ListOfUsersCallback(executor, userDao)
+    private fun downloadAndSave() =
+        userApi.getAll()
+            .subscribeOn(Schedulers.io())
+            .doOnSuccess { saveToDatabase(it) }
+            .doAfterSuccess { log("${it.size} new users were download from server") }
 
-    val users = userDao.getAll()
+    private fun downloadAndSave(idFrom: Long, count: Int) =
+        userApi.get(idFrom, count)
+            .subscribeOn(Schedulers.io())
+            .doOnSuccess { saveToDatabase(it) }
+            .doAfterSuccess { log("${it.size} new users were download from server") }
 
-    fun init() = userApi.getAll().enqueue(callback)
+    fun get(): Maybe<List<User>> =
+        Single.concat(userDao.getAll(), downloadAndSave())
+            .filter { list -> list.isNotEmpty() }
+            .firstElement()
 
-    fun load(usersSinceId: Long, usersPerPage: Int) =
-        userApi.getAll(usersSinceId, usersPerPage).enqueue(callback)
+    fun get(idFrom: Long, count: Int): Maybe<List<User>> =
+        Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, count))
+            .filter { list -> list.isNotEmpty() }
+            .firstElement()
 
-    fun deleteAll() = executor.execute { userDao.deleteAll() }
+    fun deleteAll() = userDao.deleteAll()
 }
