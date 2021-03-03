@@ -21,12 +21,12 @@ class UserRepository(
     private fun downloadAndSave() =
         userApi.getAll()
             .doOnSuccess { saveToDatabase(it) }
-            .doAfterSuccess { log("${it.size} new users were download from server") }
+            .doAfterSuccess { log("${it.size} new users were downloaded from server") }
 
     private fun downloadAndSave(idFrom: Long, count: Int) =
         userApi.get(idFrom, count)
             .doOnSuccess { saveToDatabase(it) }
-            .doAfterSuccess { log("${it.size} new users were download from server") }
+            .doAfterSuccess { log("${it.size} new users were downloaded from server") }
 
     fun get(): Maybe<List<User>> =
         Single.concat(userDao.getAll(), downloadAndSave())
@@ -35,7 +35,7 @@ class UserRepository(
             .firstElement()
 
     fun get(idFrom: Long, count: Int): Maybe<List<User>> =
-        Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, count))
+        Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, 100))
             .subscribeOn(Schedulers.io())
             .filter { list -> list.isNotEmpty() }
             .firstElement()
