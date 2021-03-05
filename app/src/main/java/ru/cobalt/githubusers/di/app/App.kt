@@ -1,20 +1,29 @@
 package ru.cobalt.githubusers.di.app
 
 import android.app.Application
-import android.content.Context
+import ru.cobalt.githubusers.di.activity.ActivityComponent
+import ru.cobalt.githubusers.di.activity.DaggerActivityComponent
 
 class App : Application() {
 
-    companion object {
-        lateinit var appContext: Context
-    }
-
     lateinit var appComponent: AppComponent
+    var activityComponent: ActivityComponent? = null
 
     override fun onCreate() {
         super.onCreate()
-        appContext = this
-        appComponent = DaggerAppComponent.builder().appModule(AppModule(appContext)).build()
+        appComponent = DaggerAppComponent.builder()
+            .appModule(AppModule(this))
+            .build()
     }
 
+    fun createActivityComponent(): ActivityComponent {
+        activityComponent = DaggerActivityComponent.builder()
+            .appComponent(appComponent)
+            .build()
+        return activityComponent!!
+    }
+
+    fun deleteActivityComponent() {
+        activityComponent = null
+    }
 }
