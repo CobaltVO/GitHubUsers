@@ -48,11 +48,13 @@ class AppModule(var appContext: Context) {
 
     @Provides
     @Singleton
-    fun provideUserRepository(userApi: UserApi, userDao: UserDao) = UserRepository(userApi, userDao)
+    fun provideUserRepository(appContext: Context, userApi: UserApi, userDao: UserDao) =
+        UserRepository(appContext, userApi, userDao)
 
     @Provides
     @Singleton
-    fun provideUserDataSource(userRepository: UserRepository) = UserDataSource(userRepository)
+    fun provideUserDataSource(appContext: Context, userRepository: UserRepository) =
+        UserDataSource(appContext, userRepository)
 
     @Provides
     @Singleton

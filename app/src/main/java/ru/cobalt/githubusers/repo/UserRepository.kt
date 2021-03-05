@@ -1,22 +1,26 @@
 package ru.cobalt.githubusers.repo
 
+import android.content.Context
 import io.reactivex.Maybe
 import io.reactivex.Single
-import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import ru.cobalt.githubusers.api.UserApi
+import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.User
 import ru.cobalt.githubusers.repo.room.UserDao
 import ru.cobalt.githubusers.utils.log
 
 class UserRepository(
+    private val appContext: Context,
     private val userApi: UserApi,
     private val userDao: UserDao,
 ) {
-    private fun saveToDatabase(list: List<User>): Disposable =
-        userDao.add(list)
-            .subscribeOn(Schedulers.io())
-            .subscribe { log("${list.size} new users were saved to database") }
+    private fun saveToDatabase(list: List<User>) =
+        (appContext as App).activityComponent?.compositeDisposable?.add(
+            userDao.add(list)
+                .subscribeOn(Schedulers.io())
+                .subscribe { log("${list.size} new users were saved to database") }
+        )
 
     private fun downloadAndSave() =
         userApi.getAll()

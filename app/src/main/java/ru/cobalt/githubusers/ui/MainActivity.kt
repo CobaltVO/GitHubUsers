@@ -23,12 +23,13 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     @Inject
     lateinit var userViewModel: UserViewModel
 
-    private val compositeDisposable = CompositeDisposable()
+    @Inject
+    lateinit var compositeDisposable: CompositeDisposable
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (applicationContext as App)
-            .appComponent
+            .createActivityComponent()
             .inject(this@MainActivity)
         listOfUsers.adapter = userViewModel.adapter
     }
