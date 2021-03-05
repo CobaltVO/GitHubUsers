@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
@@ -16,18 +17,20 @@ import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
-    private lateinit var viewModel: UserViewModel
-
     @Inject
     lateinit var userRepository: UserRepository
 
+    @Inject
+    lateinit var userViewModel: UserViewModel
+
+    private val compositeDisposable = CompositeDisposable()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        (applicationContext as App).appComponent.inject(this)
-
-        viewModel = UserViewModel(userRepository)
-        listOfUsers.adapter = viewModel.adapter
+        (applicationContext as App)
+            .appComponent
+            .inject(this@MainActivity)
+        listOfUsers.adapter = userViewModel.adapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -37,13 +40,21 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_delete_all -> viewModel.deleteAll()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    { log("Database was cleared") },
-                    { log("Can't clear database: ${it.message}") })
+            R.id.menu_item_delete_all -> compositeDisposable.add(
+                userViewModel.deleteAll()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                        { log("Database was cleared") },
+                        { log("Can't clear database: ${it.message}") })
+            )
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
+        (applicationContext as App).deleteActivityComponent()
     }
 }

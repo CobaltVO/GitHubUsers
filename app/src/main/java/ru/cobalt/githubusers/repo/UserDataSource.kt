@@ -11,7 +11,7 @@ class UserDataSource(
     override fun getKey(item: User): Long = item.id
 
     override fun loadInitial(params: LoadInitialParams<Long>, callback: LoadInitialCallback<User>) {
-        val disposable = userRepository.get(0, params.requestedLoadSize)
+        userRepository.get(0, params.requestedLoadSize)
             .subscribe(
                 {
                     callback.onResult(it)
@@ -21,7 +21,7 @@ class UserDataSource(
     }
 
     override fun loadAfter(params: LoadParams<Long>, callback: LoadCallback<User>) {
-        val disposable = userRepository.get(params.key, params.requestedLoadSize)
+        userRepository.get(params.key, params.requestedLoadSize)
             .subscribe(
                 {
                     callback.onResult(it)

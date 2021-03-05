@@ -11,7 +11,7 @@ import ru.cobalt.githubusers.utils.log
 
 class UserRepository(
     private val userApi: UserApi,
-    private val userDao: UserDao
+    private val userDao: UserDao,
 ) {
     private fun saveToDatabase(list: List<User>): Disposable =
         userDao.add(list)

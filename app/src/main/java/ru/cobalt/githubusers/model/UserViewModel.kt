@@ -10,8 +10,10 @@ import ru.cobalt.githubusers.repo.UserRepository
 import ru.cobalt.githubusers.ui.PagedUserAdapter
 import java.util.concurrent.Executors
 
-class UserViewModel(private val userRepository: UserRepository) : ViewModel() {
-    private val dataSource = UserDataSource(userRepository)
+class UserViewModel(
+    private val userRepository: UserRepository,
+    dataSource: UserDataSource,
+) : ViewModel() {
     private val listConfig = PagedList.Config.Builder()
         .setEnablePlaceholders(false)
         .setPageSize(50)
