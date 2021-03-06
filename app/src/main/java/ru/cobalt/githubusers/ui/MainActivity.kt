@@ -27,18 +27,21 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     lateinit var compositeDisposable: CompositeDisposable
 
     private var searchView: SearchView? = null
+    private var searchMenu: MenuItem? = null
     private var searchQuery: CharSequence = ""
 
-    private fun setupSearchMenu(searchMenu: MenuItem) {
-        searchMenu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
-        searchView = (searchMenu.actionView as SearchView).apply {
-            isIconified = false
-            queryHint = getString(R.string.search_hint)
-            setOnQueryTextListener(userViewModel.queryListener)
-            if (searchQuery.isNotEmpty()) {
-                searchMenu.expandActionView()
-                setQuery(searchQuery, false)
-                searchQuery = ""
+    private fun setupSearchMenu() {
+        searchMenu?.let { menu ->
+            menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
+            searchView = (menu.actionView as SearchView).apply {
+                isIconified = false
+                queryHint = getString(R.string.search_hint)
+                setOnQueryTextListener(userViewModel.queryListener)
+                if (searchQuery.isNotEmpty()) {
+                    menu.expandActionView()
+                    setQuery(searchQuery, false)
+                    searchQuery = ""
+                }
             }
         }
     }
@@ -65,7 +68,10 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
-        menu?.let { setupSearchMenu(it.findItem(R.id.menu_item_search)) }
+        menu?.let {
+            searchMenu = it.findItem(R.id.menu_item_search)
+            setupSearchMenu()
+        }
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -78,7 +84,9 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        searchView?.let { outState.putCharSequence(SEARCH_QUERY, it.query) }
+        val menu = searchMenu ?: return
+        val view = searchView ?: return
+        if (menu.isActionViewExpanded) outState.putCharSequence(SEARCH_QUERY, view.query)
     }
 
     override fun onDestroy() {
