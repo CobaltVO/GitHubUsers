@@ -31,17 +31,17 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     private var searchQuery: CharSequence = ""
 
     private fun setupSearchMenu() {
-        searchMenu?.let { menu ->
-            menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
-            searchView = (menu.actionView as SearchView).apply {
-                isIconified = false
-                queryHint = getString(R.string.search_hint)
-                setOnQueryTextListener(userViewModel.queryListener)
-                if (searchQuery.isNotEmpty()) {
-                    menu.expandActionView()
-                    setQuery(searchQuery, false)
-                    searchQuery = ""
-                }
+        val menu = searchMenu ?: return
+        menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
+
+        searchView = (menu.actionView as SearchView).apply {
+            isIconified = false
+            queryHint = getString(R.string.search_hint)
+            setOnQueryTextListener(userViewModel.queryListener)
+            if (searchQuery.isNotEmpty()) {
+                menu.expandActionView()
+                setQuery(searchQuery, false)
+                searchQuery = ""
             }
         }
     }
