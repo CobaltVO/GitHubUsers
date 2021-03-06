@@ -20,6 +20,12 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id > :idFrom LIMIT :count")
     fun get(idFrom: Long, count: Int): Single<List<User>>
 
+    @Query("SELECT * FROM users WHERE login = :login")
+    fun get(login: String): Single<User>
+
+    @Query("SELECT * FROM users WHERE login LIKE :likeQuery")
+    fun search(likeQuery: String): Single<List<User>>
+
     @Query("SELECT COUNT(*) FROM users")
     fun getCount(): Single<Long>
 

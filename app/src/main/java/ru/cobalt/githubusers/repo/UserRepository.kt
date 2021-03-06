@@ -44,5 +44,13 @@ class UserRepository(
             .filter { list -> list.isNotEmpty() }
             .firstElement()
 
+    fun get(login: String): Single<User> =
+        userDao.get(login)
+            .subscribeOn(Schedulers.io())
+
+    fun search(query: String): Single<List<User>> =
+        userDao.search("$query%")
+            .subscribeOn(Schedulers.io())
+
     fun deleteAll() = userDao.deleteAll()
 }

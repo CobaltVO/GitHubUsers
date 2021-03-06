@@ -3,6 +3,7 @@ package ru.cobalt.githubusers.ui
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -11,14 +12,11 @@ import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
-import ru.cobalt.githubusers.repo.UserRepository
+import ru.cobalt.githubusers.repo.OnMenuStateChangeListener
 import ru.cobalt.githubusers.utils.log
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(R.layout.main_activity) {
-
-    @Inject
-    lateinit var userRepository: UserRepository
 
     @Inject
     lateinit var userViewModel: UserViewModel
@@ -36,6 +34,16 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+
+        menu?.let {
+            val searchMenu = it.findItem(R.id.menu_item_search)
+            searchMenu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
+            (searchMenu.actionView as SearchView).apply {
+                isIconified = false
+                setOnQueryTextListener(userViewModel.queryListener)
+            }
+        }
+
         return super.onCreateOptionsMenu(menu)
     }
 
@@ -55,6 +63,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onDestroy() {
         super.onDestroy()
+        log("disposing")
         compositeDisposable.dispose()
         (applicationContext as App).deleteActivityComponent()
     }
