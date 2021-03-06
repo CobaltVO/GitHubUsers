@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             searchMenu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
             (searchMenu.actionView as SearchView).apply {
                 isIconified = false
+                queryHint = getString(R.string.search_hint)
                 setOnQueryTextListener(userViewModel.queryListener)
             }
         }
