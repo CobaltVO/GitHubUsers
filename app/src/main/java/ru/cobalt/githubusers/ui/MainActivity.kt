@@ -5,15 +5,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
 import ru.cobalt.githubusers.repo.OnMenuStateChangeListener
-import ru.cobalt.githubusers.utils.log
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(R.layout.main_activity) {
@@ -50,21 +47,13 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_delete_all -> compositeDisposable.add(
-                userViewModel.deleteAll()
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(
-                        { log("Database was cleared") },
-                        { log("Can't clear database: ${it.message}") })
-            )
+            R.id.menu_item_delete_all -> userViewModel.deleteAll()
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        log("disposing")
         compositeDisposable.dispose()
         (applicationContext as App).deleteActivityComponent()
     }
