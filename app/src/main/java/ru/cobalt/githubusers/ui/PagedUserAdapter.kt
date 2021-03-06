@@ -10,6 +10,8 @@ import ru.cobalt.githubusers.model.User
 class PagedUserAdapter(callback: DiffUtil.ItemCallback<User>) :
     PagedListAdapter<User, UserViewHolder>(callback) {
 
+    var onUserClickListener: (User) -> Unit = {}
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder =
         UserViewHolder(
             LayoutInflater
@@ -18,7 +20,7 @@ class PagedUserAdapter(callback: DiffUtil.ItemCallback<User>) :
         )
 
     override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-        getItem(position)?.let { holder.bind(it) }
+        getItem(position)?.let { user -> holder.bind(user) { onUserClickListener.invoke(user) } }
     }
 
 }

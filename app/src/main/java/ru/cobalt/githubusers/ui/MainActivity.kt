@@ -1,5 +1,8 @@
 package ru.cobalt.githubusers.ui
 
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -40,6 +43,13 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         }
     }
 
+    private fun openUserProfile(url: String) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        val resolveInfo = packageManager
+            .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        if (resolveInfo != null) startActivity(browserIntent)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -47,6 +57,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             .createActivityComponent()
             .inject(this@MainActivity)
         listOfUsers.adapter = userViewModel.adapter
+
+        userViewModel.setOnUserClickListener { openUserProfile(it.userPageUrl) }
 
         searchQuery = savedInstanceState?.getCharSequence(SEARCH_QUERY) ?: ""
     }

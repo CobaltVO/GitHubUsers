@@ -57,6 +57,10 @@ class UserViewModel(
         submitSearchQuery.onComplete()
     }
 
+    fun setOnUserClickListener(onUserClickListener: (User) -> Unit) {
+        adapter.onUserClickListener = onUserClickListener
+    }
+
     fun startSearch() {
         startEmitters()
         disposable.add(changeSearchQuery
@@ -94,4 +98,5 @@ class UserViewModel(
                 )
         )
     }
+
 }
