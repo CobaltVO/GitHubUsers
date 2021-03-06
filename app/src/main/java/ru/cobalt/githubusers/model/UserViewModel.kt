@@ -29,9 +29,10 @@ class UserViewModel(
         .build()
     val adapter = PagedUserAdapter(DiffUtilUserCallback()).apply { submitList(list) }
 
-    private val submitSearchQuery = PublishSubject.create<String>()
-    private val changeSearchQuery = PublishSubject.create<String>()
-    val queryListener = OnQueryTextChangeListener(submitSearchQuery, changeSearchQuery)
+    private var submitSearchQuery = PublishSubject.create<String>()
+    private var changeSearchQuery = PublishSubject.create<String>()
+    var queryListener = OnQueryTextChangeListener(submitSearchQuery, changeSearchQuery)
+
     private var disposable = CompositeDisposable()
 
     private fun showQueryResults(newList: List<User>, reassign: Boolean = false) {
@@ -44,7 +45,20 @@ class UserViewModel(
         adapter.submitList(queryList)
     }
 
+    private fun startEmitters() {
+        submitSearchQuery = PublishSubject.create()
+        changeSearchQuery = PublishSubject.create()
+        queryListener.submitEmitter = submitSearchQuery
+        queryListener.changeEmitter = changeSearchQuery
+    }
+
+    private fun stopEmitters() {
+        changeSearchQuery.onComplete()
+        submitSearchQuery.onComplete()
+    }
+
     fun startSearch() {
+        startEmitters()
         disposable.add(changeSearchQuery
             .subscribeOn(Schedulers.io())
             .debounce(300, TimeUnit.MILLISECONDS)
@@ -60,6 +74,8 @@ class UserViewModel(
     }
 
     fun stopSearch() {
+        stopEmitters()
+        // remove the query list and show original
         adapter.submitList(list)
         disposable.clear()
     }

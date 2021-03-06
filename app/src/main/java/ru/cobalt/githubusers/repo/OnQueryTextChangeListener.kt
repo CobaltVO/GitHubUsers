@@ -4,8 +4,8 @@ import android.widget.SearchView
 import io.reactivex.Observer
 
 class OnQueryTextChangeListener(
-    private val submitEmitter: Observer<String>,
-    private val changeEmitter: Observer<String>
+    var submitEmitter: Observer<String>,
+    var changeEmitter: Observer<String>
 ) : SearchView.OnQueryTextListener {
 
     override fun onQueryTextSubmit(query: String?): Boolean {
