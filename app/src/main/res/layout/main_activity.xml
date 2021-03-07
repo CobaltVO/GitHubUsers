@@ -14,9 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:title="@string/app_name"
-            app:titleTextColor="?attr/colorOnPrimary" />
+            app:titleTextColor="?attr/textColorPrimary" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
