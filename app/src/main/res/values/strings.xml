@@ -3,5 +3,7 @@
     <string name="user_id">id: %1$d</string>
     <string name="menu_button_delete_all_users">Delete all users</string>
     <string name="menu_button_search_user">Search user</string>
-    <string name="search_hint">Enter username...</string>
+    <string name="search_hint">Enter username…</string>
+    <string name="delete_all_users_successful_message">Database was cleared</string>
+    <string name="delete_all_users_successful_action_button">Load users again</string>
 </resources>

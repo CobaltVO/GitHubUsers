@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 
 class UserViewModel(
     private val userRepository: UserRepository,
-    dataSource: UserDataSource,
+    private val dataSource: UserDataSource,
 ) : ViewModel() {
 
     private val listConfig = PagedList.Config.Builder()
@@ -86,6 +86,14 @@ class UserViewModel(
         // remove the query list and show original
         adapter.submitList(list)
         disposable.clear()
+    }
+
+    fun reload() {
+        list = PagedList.Builder(dataSource, listConfig)
+            .setFetchExecutor(Executors.newSingleThreadExecutor())
+            .setNotifyExecutor { Handler(Looper.getMainLooper()).post(it) }
+            .build()
+        adapter.submitList(list)
     }
 
     fun deleteAll() {

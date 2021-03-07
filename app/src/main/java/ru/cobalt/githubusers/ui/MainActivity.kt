@@ -13,6 +13,8 @@ import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
+import ru.cobalt.githubusers.ui.utils.snack
+import ru.cobalt.githubusers.utils.log
 import javax.inject.Inject
 
 const val SEARCH_QUERY = "SEARCH_QUERY"
@@ -81,7 +83,16 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_delete_all -> userViewModel.deleteAll()
+            R.id.menu_item_delete_all -> {
+                userViewModel.deleteAll()
+                mainActivityContainer.snack(
+                    R.string.delete_all_users_successful_message,
+                    R.string.delete_all_users_successful_action_button
+                ) {
+                    log("reloading")
+                    userViewModel.reload()
+                }
+            }
         }
         return super.onOptionsItemSelected(item)
     }
