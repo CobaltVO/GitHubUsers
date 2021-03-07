@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                     R.string.delete_all_users_successful_message,
                     R.string.delete_all_users_successful_action_button
                 ) {
-                    log("reloading")
+                    log("Users reloading was started")
                     userViewModel.reload()
                 }
             }
