@@ -24,6 +24,9 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     lateinit var userViewModel: UserViewModel
 
     @Inject
+    lateinit var onMenuStateChangeListener: OnMenuStateChangeListener
+
+    @Inject
     lateinit var compositeDisposable: CompositeDisposable
 
     private var searchView: SearchView? = null
@@ -32,7 +35,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     private fun setupSearchMenu() {
         val menu = searchMenu ?: return
-        menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
+        menu.setOnActionExpandListener(onMenuStateChangeListener)
 
         searchView = (menu.actionView as SearchView).apply {
             isIconified = false
