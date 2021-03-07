@@ -29,11 +29,11 @@ class UserViewModel(
         .build()
     val adapter = PagedUserAdapter(DiffUtilUserCallback()).apply { submitList(list) }
 
-    private var submitSearchQuery = PublishSubject.create<String>()
-    private var changeSearchQuery = PublishSubject.create<String>()
-    var queryListener = OnQueryTextChangeListener(submitSearchQuery, changeSearchQuery)
+    private lateinit var submitSearchQuery: PublishSubject<String>
+    private lateinit var changeSearchQuery: PublishSubject<String>
+    val queryListener by lazy { OnQueryTextChangeListener() }
 
-    private var disposable = CompositeDisposable()
+    private val disposable by lazy { CompositeDisposable() }
 
     private fun showQueryResults(newList: List<User>, reassign: Boolean = false) {
         val searchDataSource = SearchDataSource(newList)
