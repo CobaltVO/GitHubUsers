@@ -5,10 +5,10 @@ import dagger.Module
 import dagger.Provides
 import ru.cobalt.githubusers.api.UserApi
 import ru.cobalt.githubusers.model.UserViewModel
-import ru.cobalt.githubusers.repo.OnMenuStateChangeListener
-import ru.cobalt.githubusers.repo.UserDataSource
-import ru.cobalt.githubusers.repo.UserRepository
 import ru.cobalt.githubusers.repo.room.UserDao
+import ru.cobalt.githubusers.repo.user.UserDataSource
+import ru.cobalt.githubusers.repo.user.UserRepository
+import ru.cobalt.githubusers.ui.OnMenuStateChangeListener
 import javax.inject.Singleton
 
 @Module

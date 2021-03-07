@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.ui
+package ru.cobalt.githubusers.repo.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup

@@ -13,7 +13,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
-import ru.cobalt.githubusers.repo.OnMenuStateChangeListener
 import javax.inject.Inject
 
 const val SEARCH_QUERY = "SEARCH_QUERY"

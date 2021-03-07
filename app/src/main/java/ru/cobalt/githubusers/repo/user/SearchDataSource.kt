@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.repo
+package ru.cobalt.githubusers.repo.user
 
 import androidx.paging.ItemKeyedDataSource
 import ru.cobalt.githubusers.model.User

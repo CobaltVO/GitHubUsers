@@ -8,8 +8,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
-import ru.cobalt.githubusers.repo.*
-import ru.cobalt.githubusers.ui.PagedUserAdapter
+import ru.cobalt.githubusers.repo.adapter.DiffUtilUserCallback
+import ru.cobalt.githubusers.repo.adapter.OnQueryTextChangeListener
+import ru.cobalt.githubusers.repo.adapter.PagedUserAdapter
+import ru.cobalt.githubusers.repo.user.SearchDataSource
+import ru.cobalt.githubusers.repo.user.UserDataSource
+import ru.cobalt.githubusers.repo.user.UserRepository
 import ru.cobalt.githubusers.utils.log
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit

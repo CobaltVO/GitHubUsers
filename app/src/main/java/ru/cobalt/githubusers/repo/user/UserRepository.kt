@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.repo
+package ru.cobalt.githubusers.repo.user
 
 import android.content.Context
 import io.reactivex.Maybe
