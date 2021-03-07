@@ -66,6 +66,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         userViewModel.setOnUserClickListener { openUserProfile(it.userPageUrl) }
 
         searchQuery = savedInstanceState?.getCharSequence(SEARCH_QUERY) ?: ""
+
+        setSupportActionBar(toolbar)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
