@@ -68,9 +68,9 @@ class UserViewModel(
     fun startSearch() {
         startEmitters()
         disposable.add(changeSearchQuery
-            .subscribeOn(Schedulers.io())
             .debounce(300, TimeUnit.MILLISECONDS)
             .concatMapSingle { q -> userRepository.search(q) }
+            .subscribeOn(Schedulers.io())
             .subscribe(
                 {
                     log("${it.size} GitHub users were found by user's query")
@@ -99,8 +99,8 @@ class UserViewModel(
     fun deleteAll() {
         disposable.add(
             userRepository.deleteAll()
-                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
                 .subscribe(
                     {
                         showQueryResults(listOf(), true)
