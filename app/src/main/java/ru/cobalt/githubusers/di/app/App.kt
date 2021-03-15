@@ -7,8 +7,11 @@ import ru.cobalt.githubusers.di.app.modules.AppModule
 
 class App : Application() {
 
-    lateinit var appComponent: AppComponent
-    var activityComponent: ActivityComponent? = null
+    companion object {
+        lateinit var appComponent: AppComponent
+    }
+
+    private var activityComponent: ActivityComponent? = null
 
     override fun onCreate() {
         super.onCreate()

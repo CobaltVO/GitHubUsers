@@ -8,12 +8,12 @@ class OnMenuStateChangeListener(
 ) : MenuItem.OnActionExpandListener {
 
     override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-        userViewModel.startSearch()
+        userViewModel.startUsersSearch()
         return true
     }
 
     override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-        userViewModel.stopSearch()
+        userViewModel.stopUsersSearch()
         return true
     }
 

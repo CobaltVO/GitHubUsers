@@ -32,6 +32,9 @@ interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun add(users: List<User>): Completable
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun addSync(users: List<User>)
+
     @Query("DELETE FROM users")
     fun deleteAll(): Completable
 

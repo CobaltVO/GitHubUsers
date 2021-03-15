@@ -8,11 +8,13 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.main_activity.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
+import ru.cobalt.githubusers.repo.adapter.RecyclerViewScrollListener
 import ru.cobalt.githubusers.ui.utils.snack
 import ru.cobalt.githubusers.utils.log
 import javax.inject.Inject
@@ -22,21 +24,79 @@ const val SEARCH_QUERY = "SEARCH_QUERY"
 class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     @Inject
-    lateinit var userViewModel: UserViewModel
-
-    @Inject
-    lateinit var onMenuStateChangeListener: OnMenuStateChangeListener
-
-    @Inject
     lateinit var compositeDisposable: CompositeDisposable
+
+    private lateinit var userViewModel: UserViewModel
+    private lateinit var recyclerViewScrollListener: RecyclerViewScrollListener
 
     private var searchView: SearchView? = null
     private var searchMenu: MenuItem? = null
     private var searchQuery: CharSequence = ""
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        (applicationContext as App)
+            .createActivityComponent()
+            .inject(this@MainActivity)
+
+        initViewModel(savedInstanceState)
+        listOfUsers.adapter = userViewModel.adapter
+
+        recyclerViewScrollListener = RecyclerViewScrollListener(listOfUsers.layoutManager!!) {
+            log("threshold reached! id: $it")
+            val userId = userViewModel.adapter.getUser(it)?.id ?: return@RecyclerViewScrollListener
+            log("userId: $userId")
+            userViewModel.loadUsers(userId)
+        }
+        listOfUsers.addOnScrollListener(recyclerViewScrollListener)
+
+        searchQuery = savedInstanceState?.getCharSequence(SEARCH_QUERY) ?: ""
+
+        setSupportActionBar(toolbar)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        menu?.let {
+            searchMenu = it.findItem(R.id.menu_item_search)
+            setupSearchMenu()
+        }
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_item_delete_all -> {
+                userViewModel.deleteAllUsers()
+                mainActivityContainer.snack(
+                    R.string.delete_all_users_successful_message,
+                    R.string.delete_all_users_successful_action_button
+                ) {
+                    log("Users reloading was started")
+                    userViewModel.initUsers()
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        val menu = searchMenu ?: return
+        val view = searchView ?: return
+        if (menu.isActionViewExpanded) outState.putCharSequence(SEARCH_QUERY, view.query)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        compositeDisposable.dispose()
+        (applicationContext as App).deleteActivityComponent()
+    }
+
     private fun setupSearchMenu() {
         val menu = searchMenu ?: return
-        menu.setOnActionExpandListener(onMenuStateChangeListener)
+        menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
 
         searchView = (menu.actionView as SearchView).apply {
             isIconified = false
@@ -57,56 +117,29 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         if (resolveInfo != null) startActivity(browserIntent)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        (applicationContext as App)
-            .createActivityComponent()
-            .inject(this@MainActivity)
-        listOfUsers.adapter = userViewModel.adapter
-
-        userViewModel.setOnUserClickListener { openUserProfile(it.userPageUrl) }
-
-        searchQuery = savedInstanceState?.getCharSequence(SEARCH_QUERY) ?: ""
-
-        setSupportActionBar(toolbar)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        menu?.let {
-            searchMenu = it.findItem(R.id.menu_item_search)
-            setupSearchMenu()
-        }
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_item_delete_all -> {
-                userViewModel.deleteAll()
-                mainActivityContainer.snack(
-                    R.string.delete_all_users_successful_message,
-                    R.string.delete_all_users_successful_action_button
-                ) {
-                    log("Users reloading was started")
-                    userViewModel.reload()
-                }
+    private fun render(state: ViewState) {
+        when (state) {
+            is ViewState.Empty -> log("empty")
+            is ViewState.Loading -> log("loading!")
+            is ViewState.Searching -> {
+                log("searching!")
+                recyclerViewScrollListener.isActivated = false
+            }
+            is ViewState.Loaded -> {
+                log("loaded: ${state.users.size}")
+                recyclerViewScrollListener.isActivated = true
+                recyclerViewScrollListener.onDataLoaded()
+                log("activate scroll listener")
             }
         }
-        return super.onOptionsItemSelected(item)
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        val menu = searchMenu ?: return
-        val view = searchView ?: return
-        if (menu.isActionViewExpanded) outState.putCharSequence(SEARCH_QUERY, view.query)
-    }
+    private fun initViewModel(savedInstanceState: Bundle?) {
+        userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
 
-    override fun onDestroy() {
-        super.onDestroy()
-        compositeDisposable.dispose()
-        (applicationContext as App).deleteActivityComponent()
+        userViewModel.setOnUserClickListener { openUserProfile(it.userPageUrl) }
+        userViewModel.viewState.observe(this) { if (it != null) render(it) }
+
+        if (savedInstanceState == null) userViewModel.initUsers()
     }
 }
