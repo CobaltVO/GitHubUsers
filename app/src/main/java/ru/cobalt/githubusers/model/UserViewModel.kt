@@ -11,6 +11,7 @@ import ru.cobalt.githubusers.repo.adapter.OnQueryTextChangeListener
 import ru.cobalt.githubusers.repo.adapter.UserAdapter
 import ru.cobalt.githubusers.repo.user.UserRepository
 import ru.cobalt.githubusers.ui.ViewState
+import ru.cobalt.githubusers.ui.ViewState.*
 import ru.cobalt.githubusers.utils.log
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -30,22 +31,23 @@ class UserViewModel : ViewModel() {
     val queryListener by lazy { OnQueryTextChangeListener() }
 
     val viewState: MutableLiveData<ViewState> by lazy { MutableLiveData() }
-    var lastViewState: ViewState = ViewState.Empty
+    private var currentViewState: ViewState = Empty
 
-    var lastListOfUsers: List<User>? = null
+    private var currentListOfUsers: List<User> = listOf()
 
     init {
         App.appComponent.inject(this)
     }
 
     fun initUsers() {
+        updateState(Loading)
         compositeDisposable.add(
             userRepository.get(0, 100)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        adapter.updateList(it)
-                        updateState(ViewState.Loaded(it))
+                        currentListOfUsers = adapter.updateList(it)
+                        updateState(Loaded(it))
                         log("${it.size} initial users were loaded into list")
                     },
                     { log("Can't load initial users: ${it.message}") })
@@ -58,8 +60,8 @@ class UserViewModel : ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        adapter.updateList(it)
-                        updateState(ViewState.Loaded(it))
+                        currentListOfUsers = adapter.updateList(it)
+                        updateState(Loaded(it))
                         log("${it.size} new users were loaded into list")
                     },
                     { log("Can't load new users: ${it.message}") })
@@ -74,7 +76,7 @@ class UserViewModel : ViewModel() {
                 .subscribe(
                     {
                         adapter.reloadList(listOf())
-                        updateState(ViewState.Empty)
+                        updateState(Empty)
                         log("Database was cleared")
                     },
                     { log("Can't clear database: ${it.message}") }
@@ -90,16 +92,14 @@ class UserViewModel : ViewModel() {
         startEmitters()
         compositeDisposable.add(changeSearchQuery
             .debounce(300, TimeUnit.MILLISECONDS)
+            .doOnNext { updateState(Searching) }
             .concatMapSingle { q -> userRepository.search(q) }
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
                     log("${it.size} GitHub users were found by user's query")
-                    if (lastViewState !is ViewState.Searching)
-                        lastListOfUsers = adapter.getCurrentList()
-
                     adapter.reloadList(it)
-                    updateState(ViewState.Searching)
+                    updateState(Searched(it))
                 },
                 { log("Can not perform search operation: $it") }
             )
@@ -109,11 +109,8 @@ class UserViewModel : ViewModel() {
     fun stopUsersSearch() {
         stopEmitters()
         compositeDisposable.clear()
-        lastListOfUsers?.let {
-            updateState(ViewState.Loaded(it))
-            adapter.reloadList(it)
-        }
-        lastListOfUsers = null
+        adapter.reloadList(currentListOfUsers)
+        updateState(Loaded(currentListOfUsers))
     }
 
     private fun startEmitters() {
@@ -129,7 +126,7 @@ class UserViewModel : ViewModel() {
     }
 
     private fun updateState(newViewState: ViewState) {
-        lastViewState = newViewState
+        currentViewState = newViewState
         viewState.postValue(newViewState)
     }
 }

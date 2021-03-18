@@ -4,22 +4,26 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
+import android.view.*
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.search_progress_bar.view.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
 import ru.cobalt.githubusers.repo.adapter.RecyclerViewScrollListener
+import ru.cobalt.githubusers.ui.ViewState.*
+import ru.cobalt.githubusers.ui.utils.SearchViews
+import ru.cobalt.githubusers.ui.utils.hideSearchLoader
+import ru.cobalt.githubusers.ui.utils.showSearchLoader
 import ru.cobalt.githubusers.ui.utils.snack
 import ru.cobalt.githubusers.utils.log
 import javax.inject.Inject
 
-const val SEARCH_QUERY = "SEARCH_QUERY"
+private const val SEARCH_QUERY = "SEARCH_QUERY"
 
 class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
@@ -32,6 +36,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     private var searchView: SearchView? = null
     private var searchMenu: MenuItem? = null
     private var searchQuery: CharSequence = ""
+
+    private var searchViews: SearchViews? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +116,20 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         }
     }
 
+    private fun showSearchLoader() {
+        if (searchViews == null) {
+            searchViews = searchView?.showSearchLoader(
+                this,
+                R.layout.search_progress_bar
+            )
+        }
+    }
+
+    private fun hideSearchLoader() {
+        searchView?.hideSearchLoader(searchViews ?: return)
+        searchViews = null
+    }
+
     private fun openUserProfile(url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         val resolveInfo = packageManager
@@ -118,18 +138,30 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     }
 
     private fun render(state: ViewState) {
+        log("State: $state")
         when (state) {
-            is ViewState.Empty -> log("empty")
-            is ViewState.Loading -> log("loading!")
-            is ViewState.Searching -> {
-                log("searching!")
-                recyclerViewScrollListener.isActivated = false
+            is Empty -> {
+                progressBar.visibility = View.GONE
+                listOfUsers.visibility = View.INVISIBLE
             }
-            is ViewState.Loaded -> {
-                log("loaded: ${state.users.size}")
+            is Loading -> {
+                progressBar.visibility = View.VISIBLE
+                listOfUsers.visibility = View.INVISIBLE
+            }
+            is Loaded -> {
+                progressBar.visibility = View.GONE
+                listOfUsers.visibility = View.VISIBLE
+
                 recyclerViewScrollListener.isActivated = true
                 recyclerViewScrollListener.onDataLoaded()
-                log("activate scroll listener")
+            }
+            is Searching -> {
+                recyclerViewScrollListener.isActivated = false
+                showSearchLoader()
+            }
+            is Searched -> {
+                recyclerViewScrollListener.isActivated = false
+                hideSearchLoader()
             }
         }
     }

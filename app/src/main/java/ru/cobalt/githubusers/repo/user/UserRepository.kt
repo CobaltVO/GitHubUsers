@@ -30,7 +30,7 @@ class UserRepository(
             .subscribeOn(Schedulers.io())
 
     fun get(idFrom: Long, count: Int): Maybe<List<User>> =
-        Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, 100))
+        Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, count))
             .filter { list -> list.isNotEmpty() }
             .firstElement()
             .subscribeOn(Schedulers.io())

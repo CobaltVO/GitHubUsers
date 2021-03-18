@@ -36,9 +36,14 @@ class UserAdapter : RecyclerView.Adapter<UserViewHolder>() {
         holder.bind(user) { onUserClickListener.invoke(user) }
     }
 
-    fun getCurrentList(): MutableList<User> = differ.currentList
-    fun updateList(newSubList: List<User>) = differ.submitList(differ.currentList + newSubList)
+    fun getCurrentList(): List<User> = differ.currentList
     fun reloadList(newList: List<User>) = differ.submitList(newList)
+
+    fun updateList(newSubList: List<User>): List<User> {
+        val listToPublish = differ.currentList + newSubList
+        differ.submitList(listToPublish)
+        return listToPublish
+    }
 
     fun getUser(listPosition: Int): User? {
         return try {
