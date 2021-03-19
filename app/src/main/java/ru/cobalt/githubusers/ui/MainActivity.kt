@@ -46,20 +46,12 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             .createActivityComponent()
             .inject(this@MainActivity)
 
-        initViewModel(savedInstanceState)
-        listOfUsers.adapter = userViewModel.adapter
+        setSupportActionBar(toolbar)
 
-        recyclerViewScrollListener = RecyclerViewScrollListener(listOfUsers.layoutManager!!) {
-            log("threshold reached! id: $it")
-            val userId = userViewModel.adapter.getUser(it)?.id ?: return@RecyclerViewScrollListener
-            log("userId: $userId")
-            userViewModel.loadUsers(userId)
-        }
-        listOfUsers.addOnScrollListener(recyclerViewScrollListener)
+        initViewModel(savedInstanceState)
+        initRecyclerView()
 
         searchQuery = savedInstanceState?.getCharSequence(SEARCH_QUERY) ?: ""
-
-        setSupportActionBar(toolbar)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -100,43 +92,6 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         (applicationContext as App).deleteActivityComponent()
     }
 
-    private fun setupSearchMenu() {
-        val menu = searchMenu ?: return
-        menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
-
-        searchView = (menu.actionView as SearchView).apply {
-            isIconified = false
-            queryHint = getString(R.string.search_hint)
-            setOnQueryTextListener(userViewModel.queryListener)
-            if (searchQuery.isNotEmpty()) {
-                menu.expandActionView()
-                setQuery(searchQuery, false)
-                searchQuery = ""
-            }
-        }
-    }
-
-    private fun showSearchLoader() {
-        if (searchIconViews == null) {
-            searchIconViews = searchView?.showSearchLoader(
-                this,
-                R.layout.search_progress_bar
-            )
-        }
-    }
-
-    private fun hideSearchLoader() {
-        searchView?.hideSearchLoader(searchIconViews ?: return)
-        searchIconViews = null
-    }
-
-    private fun openUserProfile(url: String) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        val resolveInfo = packageManager
-            .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-        if (resolveInfo != null) startActivity(browserIntent)
-    }
-
     private fun render(state: ViewState) {
         log("State: $state")
         when (state) {
@@ -174,4 +129,52 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
         if (savedInstanceState == null) userViewModel.initUsers()
     }
+
+    private fun initRecyclerView() {
+        listOfUsers.adapter = userViewModel.adapter
+
+        recyclerViewScrollListener = RecyclerViewScrollListener(listOfUsers.layoutManager!!) {
+            val userId = userViewModel.adapter.getUser(it)?.id ?: return@RecyclerViewScrollListener
+            userViewModel.loadUsers(userId)
+        }
+        listOfUsers.addOnScrollListener(recyclerViewScrollListener)
+    }
+
+    private fun setupSearchMenu() {
+        val menu = searchMenu ?: return
+        menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
+
+        searchView = (menu.actionView as SearchView).apply {
+            isIconified = false
+            queryHint = getString(R.string.search_hint)
+            setOnQueryTextListener(userViewModel.queryListener)
+            if (searchQuery.isNotEmpty()) {
+                menu.expandActionView()
+                setQuery(searchQuery, false)
+                searchQuery = ""
+            }
+        }
+    }
+
+    private fun showSearchLoader() {
+        if (searchIconViews == null) {
+            searchIconViews = searchView?.showSearchLoader(
+                this,
+                R.layout.search_progress_bar
+            )
+        }
+    }
+
+    private fun hideSearchLoader() {
+        searchView?.hideSearchLoader(searchIconViews ?: return)
+        searchIconViews = null
+    }
+
+    private fun openUserProfile(url: String) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        val resolveInfo = packageManager
+            .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        if (resolveInfo != null) startActivity(browserIntent)
+    }
+
 }
