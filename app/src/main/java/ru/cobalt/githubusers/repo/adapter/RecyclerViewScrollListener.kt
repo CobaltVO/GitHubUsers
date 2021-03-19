@@ -22,7 +22,6 @@ class RecyclerViewScrollListener(
             val totalItemCount = layoutManager.itemCount
             val lastItemPosition: Int = layoutManager.findLastVisibleItemPosition()
 
-//            log("$lastItemPosition/$totalItemCount")
             if (
                 isActivated
                 && isNeedLoading

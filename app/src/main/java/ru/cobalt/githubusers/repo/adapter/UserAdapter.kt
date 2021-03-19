@@ -9,7 +9,10 @@ import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.User
 import javax.inject.Inject
 
-class UserAdapter : RecyclerView.Adapter<UserViewHolder>() {
+const val TYPE_USER = 0
+const val TYPE_LOADER = 1
+
+class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     @Inject
     lateinit var callback: DiffUtilUserCallback
@@ -24,16 +27,33 @@ class UserAdapter : RecyclerView.Adapter<UserViewHolder>() {
 
     override fun getItemCount(): Int = differ.currentList.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder =
-        UserViewHolder(
-            LayoutInflater
-                .from(parent.context)
-                .inflate(R.layout.item_user, parent, false)
-        )
+    override fun getItemViewType(position: Int): Int {
+        return if (position == differ.currentList.size - 1) TYPE_LOADER else TYPE_USER
+    }
 
-    override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
-        val user = differ.currentList[position]
-        holder.bind(user) { onUserClickListener.invoke(user) }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+        when (viewType) {
+            TYPE_USER -> UserViewHolder(
+                LayoutInflater
+                    .from(parent.context)
+                    .inflate(R.layout.item_user, parent, false)
+            )
+            else -> LoaderViewHolder(
+                LayoutInflater
+                    .from(parent.context)
+                    .inflate(R.layout.item_loader, parent, false)
+            )
+        }
+
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        when (holder) {
+            is UserViewHolder -> {
+                val user = differ.currentList[position]
+                holder.bind(user) { onUserClickListener.invoke(user) }
+            }
+        }
+
     }
 
     fun getCurrentList(): List<User> = differ.currentList
