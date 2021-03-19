@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     private var searchMenu: MenuItem? = null
     private var searchQuery: CharSequence = ""
 
-    private var searchViews: SearchViews? = null
+    private var searchIconViews: SearchViews? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,8 +117,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     }
 
     private fun showSearchLoader() {
-        if (searchViews == null) {
-            searchViews = searchView?.showSearchLoader(
+        if (searchIconViews == null) {
+            searchIconViews = searchView?.showSearchLoader(
                 this,
                 R.layout.search_progress_bar
             )
@@ -126,8 +126,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     }
 
     private fun hideSearchLoader() {
-        searchView?.hideSearchLoader(searchViews ?: return)
-        searchViews = null
+        searchView?.hideSearchLoader(searchIconViews ?: return)
+        searchIconViews = null
     }
 
     private fun openUserProfile(url: String) {
