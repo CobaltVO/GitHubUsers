@@ -47,21 +47,20 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val user = differ.currentList[position]
         when (holder) {
-            is UserViewHolder -> {
-                val user = differ.currentList[position]
-                holder.bind(user) { onUserClickListener.invoke(user) }
-            }
+            is UserViewHolder -> holder.bind(user) { onUserClickListener.invoke(user) }
+            is LoaderViewHolder -> holder.bind(user) { onUserClickListener.invoke(user) }
         }
-
     }
 
     fun getCurrentList(): List<User> = differ.currentList
-    fun reloadList(newList: List<User>) = differ.submitList(newList)
+    fun reloadList(newList: List<User>, commitCallback: Runnable? = null) =
+        differ.submitList(newList, commitCallback)
 
-    fun updateList(newSubList: List<User>): List<User> {
+    fun updateList(newSubList: List<User>, commitCallback: Runnable? = null): List<User> {
         val listToPublish = differ.currentList + newSubList
-        differ.submitList(listToPublish)
+        differ.submitList(listToPublish, commitCallback)
         return listToPublish
     }
 

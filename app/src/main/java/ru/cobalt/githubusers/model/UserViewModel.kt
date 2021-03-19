@@ -46,8 +46,7 @@ class UserViewModel : ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        currentListOfUsers = adapter.updateList(it)
-                        updateState(Loaded(it))
+                        currentListOfUsers = adapter.updateList(it) { updateState(Loaded(it)) }
                         log("${it.size} initial users were loaded into list")
                     },
                     { log("Can't load initial users: ${it.message}") })
@@ -60,8 +59,7 @@ class UserViewModel : ViewModel() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        currentListOfUsers = adapter.updateList(it)
-                        updateState(Loaded(it))
+                        currentListOfUsers = adapter.updateList(it) { updateState(Loaded(it)) }
                         log("${it.size} new users were loaded into list")
                     },
                     { log("Can't load new users: ${it.message}") })
@@ -75,8 +73,7 @@ class UserViewModel : ViewModel() {
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     {
-                        adapter.reloadList(listOf())
-                        updateState(Empty)
+                        adapter.reloadList(listOf()) { updateState(Empty) }
                         log("Database was cleared")
                     },
                     { log("Can't clear database: ${it.message}") }
@@ -97,9 +94,8 @@ class UserViewModel : ViewModel() {
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
+                    adapter.reloadList(it) { updateState(Searched(it)) }
                     log("${it.size} GitHub users were found by user's query")
-                    adapter.reloadList(it)
-                    updateState(Searched(it))
                 },
                 { log("Can not perform search operation: $it") }
             )
