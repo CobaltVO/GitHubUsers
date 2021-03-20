@@ -21,6 +21,7 @@ import ru.cobalt.githubusers.ui.utils.hideSearchLoader
 import ru.cobalt.githubusers.ui.utils.showSearchLoader
 import ru.cobalt.githubusers.ui.utils.snack
 import ru.cobalt.githubusers.utils.log
+import ru.cobalt.githubusers.utils.logError
 import javax.inject.Inject
 
 private const val SEARCH_QUERY = "SEARCH_QUERY"
@@ -65,16 +66,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_delete_all -> {
-                userViewModel.deleteAllUsers()
-                mainActivityContainer.snack(
-                    R.string.delete_all_users_successful_message,
-                    R.string.delete_all_users_successful_action_button
-                ) {
-                    log("Users reloading was started")
-                    userViewModel.initUsers()
-                }
-            }
+            R.id.menu_item_delete_all -> userViewModel.deleteAllUsers()
         }
         return super.onOptionsItemSelected(item)
     }
@@ -98,6 +90,14 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             is Empty -> {
                 progressBar.visibility = View.GONE
                 listOfUsers.visibility = View.INVISIBLE
+
+                mainActivityContainer.snack(
+                    R.string.delete_all_users_successful_message,
+                    R.string.delete_all_users_successful_action_button
+                ) {
+                    log("Users reloading was started")
+                    userViewModel.initUsers()
+                }
             }
             is Loading -> {
                 progressBar.visibility = View.VISIBLE
@@ -115,8 +115,28 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                 showSearchLoader()
             }
             is Searched -> {
-                recyclerViewScrollListener.isActivated = false
                 hideSearchLoader()
+            }
+            is NetworkError -> {
+                logError("network: ${state.errorMessage}")
+                progressBar.visibility = View.GONE
+
+                mainActivityContainer.snack(
+                    R.string.load_users_error_message,
+                    R.string.load_users_error_action_button
+                ) {
+                    log("Trying to load users again")
+                    userViewModel.loadUsers(state.lastUserId)
+                }
+            }
+            is DatabaseError -> {
+                logError("database: ${state.errorMessage}")
+                mainActivityContainer.snack(R.string.delete_all_users_error_message)
+            }
+            is SearchError -> {
+                logError("search: ${state.errorMessage}")
+                hideSearchLoader()
+                mainActivityContainer.snack(R.string.search_user_error_message)
             }
         }
     }

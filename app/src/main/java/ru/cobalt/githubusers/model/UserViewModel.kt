@@ -26,7 +26,6 @@ class UserViewModel : ViewModel() {
 
     private val compositeDisposable by lazy { CompositeDisposable() }
 
-    private lateinit var submitSearchQuery: PublishSubject<String>
     private lateinit var changeSearchQuery: PublishSubject<String>
     val queryListener by lazy { OnQueryTextChangeListener() }
 
@@ -39,6 +38,10 @@ class UserViewModel : ViewModel() {
         App.appComponent.inject(this)
     }
 
+    fun setOnUserClickListener(onUserClickListener: (User) -> Unit) {
+        adapter.onUserClickListener = onUserClickListener
+    }
+
     fun initUsers() {
         updateState(Loading)
         compositeDisposable.add(
@@ -49,7 +52,11 @@ class UserViewModel : ViewModel() {
                         currentListOfUsers = adapter.updateList(it) { updateState(Loaded(it)) }
                         log("${it.size} initial users were loaded into list")
                     },
-                    { log("Can't load initial users: ${it.message}") })
+                    {
+                        updateState(
+                            NetworkError(0, "Can't load initial users: $it")
+                        )
+                    })
         )
     }
 
@@ -62,7 +69,14 @@ class UserViewModel : ViewModel() {
                         currentListOfUsers = adapter.updateList(it) { updateState(Loaded(it)) }
                         log("${it.size} new users were loaded into list")
                     },
-                    { log("Can't load new users: ${it.message}") })
+                    {
+                        updateState(
+                            NetworkError(
+                                adapter.getLastUser()?.id ?: 0,
+                                "Can't load new users: $it"
+                            )
+                        )
+                    })
         )
     }
 
@@ -76,13 +90,9 @@ class UserViewModel : ViewModel() {
                         adapter.reloadList(listOf()) { updateState(Empty) }
                         log("Database was cleared")
                     },
-                    { log("Can't clear database: ${it.message}") }
+                    { updateState(DatabaseError("Can't clear database: $it")) }
                 )
         )
-    }
-
-    fun setOnUserClickListener(onUserClickListener: (User) -> Unit) {
-        adapter.onUserClickListener = onUserClickListener
     }
 
     fun startUsersSearch() {
@@ -97,7 +107,7 @@ class UserViewModel : ViewModel() {
                     adapter.reloadList(it) { updateState(Searched(it)) }
                     log("${it.size} GitHub users were found by user's query")
                 },
-                { log("Can not perform search operation: $it") }
+                { updateState(SearchError("Unable to search users: $it")) }
             )
         )
     }
@@ -110,19 +120,17 @@ class UserViewModel : ViewModel() {
     }
 
     private fun startEmitters() {
-        submitSearchQuery = PublishSubject.create()
         changeSearchQuery = PublishSubject.create()
-        queryListener.submitEmitter = submitSearchQuery
         queryListener.changeEmitter = changeSearchQuery
     }
 
     private fun stopEmitters() {
         changeSearchQuery.onComplete()
-        submitSearchQuery.onComplete()
     }
 
     private fun updateState(newViewState: ViewState) {
         currentViewState = newViewState
         viewState.postValue(newViewState)
     }
+
 }

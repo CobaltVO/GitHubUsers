@@ -72,4 +72,11 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
+    fun getLastUser(): User? {
+        return try {
+            differ.currentList[differ.currentList.lastIndex]
+        } catch (e: IndexOutOfBoundsException) {
+            null
+        }
+    }
 }
