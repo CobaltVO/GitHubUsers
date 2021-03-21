@@ -119,6 +119,14 @@ class UserViewModel : ViewModel() {
         updateState(Loaded(currentListOfUsers))
     }
 
+    fun showUsersLoader() {
+        adapter.isLoaderActivated = true
+    }
+
+    fun hideUsersLoader() {
+        adapter.isLoaderActivated = false
+    }
+
     private fun startEmitters() {
         changeSearchQuery = PublishSubject.create()
         queryListener.changeEmitter = changeSearchQuery

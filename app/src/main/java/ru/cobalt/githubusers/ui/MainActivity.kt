@@ -102,6 +102,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             is Loading -> {
                 progressBar.visibility = View.VISIBLE
                 listOfUsers.visibility = View.INVISIBLE
+
+                userViewModel.showUsersLoader()
             }
             is Loaded -> {
                 progressBar.visibility = View.GONE
@@ -109,10 +111,13 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
                 recyclerViewScrollListener.isActivated = true
                 recyclerViewScrollListener.onDataLoaded()
+
+                userViewModel.showUsersLoader()
             }
             is Searching -> {
                 recyclerViewScrollListener.isActivated = false
                 showSearchLoader()
+                userViewModel.hideUsersLoader()
             }
             is Searched -> {
                 hideSearchLoader()
@@ -120,6 +125,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             is NetworkError -> {
                 logError("network: ${state.errorMessage}")
                 progressBar.visibility = View.GONE
+                userViewModel.hideUsersLoader()
 
                 mainActivityContainer.snack(
                     R.string.load_users_error_message,

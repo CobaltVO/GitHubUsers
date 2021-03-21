@@ -20,6 +20,7 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private val differ: AsyncListDiffer<User> by lazy { AsyncListDiffer(this, callback) }
 
     var onUserClickListener: (User) -> Unit = {}
+    var isLoaderActivated: Boolean = true
 
     init {
         App.appComponent.inject(this)
@@ -28,7 +29,8 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun getItemCount(): Int = differ.currentList.size
 
     override fun getItemViewType(position: Int): Int {
-        return if (position == differ.currentList.size - 1) TYPE_LOADER else TYPE_USER
+        return if (position == differ.currentList.size - 1 && isLoaderActivated) TYPE_LOADER
+        else TYPE_USER
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
