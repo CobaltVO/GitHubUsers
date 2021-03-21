@@ -30,9 +30,6 @@ class UserViewModel : ViewModel() {
     val queryListener by lazy { OnQueryTextChangeListener() }
 
     val viewState: MutableLiveData<ViewState> by lazy { MutableLiveData() }
-    private var currentViewState: ViewState = Empty
-
-    private var currentListOfUsers: List<User> = listOf()
 
     init {
         App.appComponent.inject(this)
@@ -43,13 +40,13 @@ class UserViewModel : ViewModel() {
     }
 
     fun initUsers() {
-        updateState(Loading)
+        updateState(Initialization)
         compositeDisposable.add(
             userRepository.get(0, 100)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        currentListOfUsers = adapter.updateList(it) { updateState(Loaded(it)) }
+                        adapter.reloadList(it) { updateState(Loaded) }
                         log("${it.size} initial users were loaded into list")
                     },
                     {
@@ -61,12 +58,13 @@ class UserViewModel : ViewModel() {
     }
 
     fun loadUsers(fromId: Long) {
+        updateState(Loading)
         compositeDisposable.add(
             userRepository.get(fromId, 100)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        currentListOfUsers = adapter.updateList(it) { updateState(Loaded(it)) }
+                        adapter.updateList(it) { updateState(Loaded) }
                         log("${it.size} new users were loaded into list")
                     },
                     {
@@ -90,13 +88,18 @@ class UserViewModel : ViewModel() {
                         adapter.reloadList(listOf()) { updateState(Empty) }
                         log("Database was cleared")
                     },
-                    { updateState(DatabaseError("Can't clear database: $it")) }
+                    {
+                        updateState(
+                            DatabaseError("Can't clear database: $it")
+                        )
+                    }
                 )
         )
     }
 
     fun startUsersSearch() {
         startEmitters()
+        adapter.saveList()
         compositeDisposable.add(changeSearchQuery
             .debounce(300, TimeUnit.MILLISECONDS)
             .doOnNext { updateState(Searching) }
@@ -104,10 +107,12 @@ class UserViewModel : ViewModel() {
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
-                    adapter.reloadList(it) { updateState(Searched(it)) }
+                    adapter.reloadList(it) { updateState(Searched) }
                     log("${it.size} GitHub users were found by user's query")
                 },
-                { updateState(SearchError("Unable to search users: $it")) }
+                {
+                    updateState(SearchError("Unable to search users: $it"))
+                }
             )
         )
     }
@@ -115,8 +120,7 @@ class UserViewModel : ViewModel() {
     fun stopUsersSearch() {
         stopEmitters()
         compositeDisposable.clear()
-        adapter.reloadList(currentListOfUsers)
-        updateState(Loaded(currentListOfUsers))
+        adapter.reloadList(adapter.restoreList()) { updateState(Loaded) }
     }
 
     fun showUsersLoader() {
@@ -137,7 +141,6 @@ class UserViewModel : ViewModel() {
     }
 
     private fun updateState(newViewState: ViewState) {
-        currentViewState = newViewState
         viewState.postValue(newViewState)
     }
 

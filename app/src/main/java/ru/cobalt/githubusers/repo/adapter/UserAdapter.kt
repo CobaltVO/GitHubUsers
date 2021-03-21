@@ -19,6 +19,8 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val differ: AsyncListDiffer<User> by lazy { AsyncListDiffer(this, callback) }
 
+    private var savedList: List<User> = listOf()
+
     var onUserClickListener: (User) -> Unit = {}
     var isLoaderActivated: Boolean = true
 
@@ -57,14 +59,18 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     fun getCurrentList(): List<User> = differ.currentList
+
     fun reloadList(newList: List<User>, commitCallback: Runnable? = null) =
         differ.submitList(newList, commitCallback)
 
-    fun updateList(newSubList: List<User>, commitCallback: Runnable? = null): List<User> {
-        val listToPublish = differ.currentList + newSubList
-        differ.submitList(listToPublish, commitCallback)
-        return listToPublish
+    fun updateList(newSubList: List<User>, commitCallback: Runnable? = null) =
+        differ.submitList(differ.currentList + newSubList, commitCallback)
+
+    fun saveList() {
+        savedList = getCurrentList()
     }
+
+    fun restoreList(): List<User> = savedList
 
     fun getUser(listPosition: Int): User? {
         return try {

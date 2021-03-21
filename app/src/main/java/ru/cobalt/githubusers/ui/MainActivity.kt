@@ -75,7 +75,10 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         super.onSaveInstanceState(outState)
         val menu = searchMenu ?: return
         val view = searchView ?: return
-        if (menu.isActionViewExpanded) outState.putCharSequence(SEARCH_QUERY, view.query)
+        if (menu.isActionViewExpanded) {
+            outState.putCharSequence(SEARCH_QUERY, view.query)
+            userViewModel.stopUsersSearch()
+        }
     }
 
     override fun onDestroy() {
@@ -99,10 +102,14 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                     userViewModel.initUsers()
                 }
             }
-            is Loading -> {
+            is Initialization -> {
                 progressBar.visibility = View.VISIBLE
                 listOfUsers.visibility = View.INVISIBLE
 
+                recyclerViewScrollListener.isActivated = false
+                userViewModel.showUsersLoader()
+            }
+            is Loading -> {
                 userViewModel.showUsersLoader()
             }
             is Loaded -> {
@@ -112,7 +119,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                 recyclerViewScrollListener.isActivated = true
                 recyclerViewScrollListener.onDataLoaded()
 
-                userViewModel.showUsersLoader()
+                userViewModel.hideUsersLoader()
             }
             is Searching -> {
                 recyclerViewScrollListener.isActivated = false
