@@ -8,6 +8,8 @@
     <string name="search_user_error_message">Unable to search users</string>
 
     <string name="menu_button_delete_all_users">Delete all users</string>
+    <string name="delete_all_users_confirmation_message">Are you sure you want to delete all the users?</string>
+    <string name="delete_all_users_confirmation_action_button">Yes</string>
     <string name="delete_all_users_successful_message">Database was cleared</string>
     <string name="delete_all_users_successful_action_button">Load users again</string>
     <string name="delete_all_users_error_message">Unable to clear the database</string>

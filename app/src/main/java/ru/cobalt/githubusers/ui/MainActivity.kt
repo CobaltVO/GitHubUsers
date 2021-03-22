@@ -8,6 +8,7 @@ import android.view.*
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.snackbar.Snackbar
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.search_progress_bar.view.*
@@ -66,7 +67,11 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.menu_item_delete_all -> userViewModel.deleteAllUsers()
+            R.id.menu_item_delete_all -> mainActivityContainer.snack(
+                R.string.delete_all_users_confirmation_message,
+                R.string.delete_all_users_confirmation_action_button,
+                Snackbar.LENGTH_LONG
+            ) { userViewModel.deleteAllUsers() }
         }
         return super.onOptionsItemSelected(item)
     }

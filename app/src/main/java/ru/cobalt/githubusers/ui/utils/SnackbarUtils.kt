@@ -32,9 +32,12 @@ private fun Snackbar.applyButtonStyle(): Snackbar = this
         )
     )
 
-fun View.snack(@StringRes message: Int) {
+fun View.snack(
+    @StringRes message: Int,
+    duration: Int = Snackbar.LENGTH_SHORT,
+) {
     return Snackbar
-        .make(this, message, Snackbar.LENGTH_SHORT)
+        .make(this, message, duration)
         .applyStyle()
         .show()
 }
@@ -42,10 +45,11 @@ fun View.snack(@StringRes message: Int) {
 fun View.snack(
     @StringRes message: Int,
     @StringRes buttonName: Int,
-    listener: View.OnClickListener
+    duration: Int = Snackbar.LENGTH_INDEFINITE,
+    listener: View.OnClickListener,
 ) {
     return Snackbar
-        .make(this, message, Snackbar.LENGTH_INDEFINITE)
+        .make(this, message, duration)
         .applyStyle()
         .applyButtonStyle()
         .setAction(buttonName, listener)
@@ -55,10 +59,11 @@ fun View.snack(
 fun View.snack(
     message: String,
     @StringRes buttonName: Int,
-    listener: View.OnClickListener
+    duration: Int = Snackbar.LENGTH_INDEFINITE,
+    listener: View.OnClickListener,
 ) {
     return Snackbar
-        .make(this, message, Snackbar.LENGTH_INDEFINITE)
+        .make(this, message, duration)
         .applyStyle()
         .applyButtonStyle()
         .setAction(buttonName, listener)
@@ -68,10 +73,11 @@ fun View.snack(
 fun View.snack(
     message: String,
     buttonName: String,
-    listener: View.OnClickListener
+    duration: Int = Snackbar.LENGTH_INDEFINITE,
+    listener: View.OnClickListener,
 ) {
     return Snackbar
-        .make(this, message, Snackbar.LENGTH_INDEFINITE)
+        .make(this, message, duration)
         .applyStyle()
         .applyButtonStyle()
         .setAction(buttonName, listener)
