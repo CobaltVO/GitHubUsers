@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.ui
+package ru.cobalt.githubusers.ui.listener
 
 import android.view.MenuItem
 import ru.cobalt.githubusers.model.UserViewModel

@@ -7,11 +7,11 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import ru.cobalt.githubusers.di.app.App
-import ru.cobalt.githubusers.repo.adapter.OnQueryTextChangeListener
 import ru.cobalt.githubusers.repo.adapter.UserAdapter
 import ru.cobalt.githubusers.repo.user.UserRepository
 import ru.cobalt.githubusers.ui.ViewState
 import ru.cobalt.githubusers.ui.ViewState.*
+import ru.cobalt.githubusers.ui.listener.OnQueryTextChangeListener
 import ru.cobalt.githubusers.utils.log
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

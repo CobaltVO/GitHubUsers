@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.repo.adapter
+package ru.cobalt.githubusers.ui.listener
 
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView

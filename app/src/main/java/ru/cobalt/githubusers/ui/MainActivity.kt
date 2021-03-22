@@ -19,8 +19,9 @@ import kotlinx.android.synthetic.main.search_progress_bar.view.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.UserViewModel
-import ru.cobalt.githubusers.repo.adapter.RecyclerViewScrollListener
 import ru.cobalt.githubusers.ui.ViewState.*
+import ru.cobalt.githubusers.ui.listener.OnMenuStateChangeListener
+import ru.cobalt.githubusers.ui.listener.RecyclerViewScrollListener
 import ru.cobalt.githubusers.ui.utils.SearchViews
 import ru.cobalt.githubusers.ui.utils.hideSearchLoader
 import ru.cobalt.githubusers.ui.utils.showSearchLoader
