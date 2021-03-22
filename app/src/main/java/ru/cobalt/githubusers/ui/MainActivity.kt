@@ -2,7 +2,6 @@ package ru.cobalt.githubusers.ui
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -216,12 +215,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     private fun openUserProfile(url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-        val resolveInfo = packageManager
-            .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-        if (resolveInfo != null) {
-            makeTouchVibrationFeedback()
-            startActivity(browserIntent)
-        }
+        makeTouchVibrationFeedback()
+        startActivity(browserIntent)
     }
 
     private fun makeTouchVibrationFeedback() {
