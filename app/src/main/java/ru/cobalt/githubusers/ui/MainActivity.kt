@@ -1,9 +1,13 @@
 package ru.cobalt.githubusers.ui
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.view.*
 import android.widget.SearchView
 import androidx.appcompat.app.AppCompatActivity
@@ -212,7 +216,16 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         val resolveInfo = packageManager
             .resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
-        if (resolveInfo != null) startActivity(browserIntent)
+        if (resolveInfo != null) {
+            makeTouchVibrationFeedback()
+            startActivity(browserIntent)
+        }
     }
 
+    private fun makeTouchVibrationFeedback() {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
+            val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            vibrator.vibrate(VibrationEffect.createOneShot(50, 255))
+        }
+    }
 }
