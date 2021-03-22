@@ -1,5 +1,6 @@
 package ru.cobalt.githubusers.di.app
 
+import android.content.Context
 import dagger.Component
 import ru.cobalt.githubusers.di.app.modules.AdapterModule
 import ru.cobalt.githubusers.di.app.modules.AppModule
@@ -19,6 +20,7 @@ import javax.inject.Singleton
 )
 @Singleton
 interface AppComponent {
+    val context: Context
     fun inject(userViewModel: UserViewModel)
     fun inject(userAdapter: UserAdapter)
 }

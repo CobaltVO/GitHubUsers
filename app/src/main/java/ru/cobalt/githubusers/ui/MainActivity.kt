@@ -185,7 +185,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     private fun setupSearchMenu() {
         val menu = searchMenu ?: return
-        menu.setOnActionExpandListener(OnMenuStateChangeListener(userViewModel))
+        menu.setOnActionExpandListener(OnMenuStateChangeListener(this, userViewModel))
 
         searchView = (menu.actionView as SearchView).apply {
             isIconified = false
