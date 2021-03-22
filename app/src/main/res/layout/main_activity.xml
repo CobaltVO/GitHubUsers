@@ -33,6 +33,7 @@
         android:layout_width="400dp"
         android:layout_height="400dp"
         android:layout_gravity="center"
+        android:paddingTop="?attr/actionBarSize"
         android:visibility="gone"
         tools:visibility="visible" />
 
