@@ -149,7 +149,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                     R.string.load_users_error_action_button
                 ) {
                     log("Trying to load users again")
-                    userViewModel.loadUsers(state.lastUserId)
+                    if (state.lastUserId == 0L) userViewModel.initUsers()
+                    else userViewModel.loadUsers(state.lastUserId)
                 }
             }
             is DatabaseError -> {
