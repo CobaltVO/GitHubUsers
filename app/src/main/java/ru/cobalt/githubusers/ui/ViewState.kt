@@ -12,6 +12,7 @@ sealed class ViewState {
     object Searched : ViewState()
 
     data class NetworkError(val lastUserId: Long, val errorMessage: String) : ViewState()
+    data class ApiLimitError(val docUrl: String, val errorMessage: String) : ViewState()
     data class SearchError(val errorMessage: String) : ViewState()
     data class DatabaseError(val errorMessage: String) : ViewState()
 

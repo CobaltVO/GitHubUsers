@@ -156,6 +156,19 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                     else userViewModel.loadUsers(state.lastUserId)
                 }
             }
+            is ApiLimitError -> {
+                logError("api limitation: ${state.errorMessage}, docUrl=${state.docUrl}")
+                progressBar.visibility = View.GONE
+                userViewModel.hideUsersLoader()
+
+                mainActivityContainer.snack(
+                    R.string.load_users_api_limit_error_message,
+                    R.string.load_users_api_limit_error_action_button
+                ) {
+                    log("Going to GitHub to get details about API limit")
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(state.docUrl)))
+                }
+            }
             is DatabaseError -> {
                 logError("database: ${state.errorMessage}")
                 mainActivityContainer.snack(R.string.delete_all_users_error_message)

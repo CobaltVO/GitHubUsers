@@ -7,6 +7,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import ru.cobalt.githubusers.di.app.App
+import ru.cobalt.githubusers.interceptor.ErrorInterceptor
 import ru.cobalt.githubusers.repo.adapter.UserAdapter
 import ru.cobalt.githubusers.repo.user.UserRepository
 import ru.cobalt.githubusers.ui.ViewState
@@ -24,6 +25,9 @@ class UserViewModel : ViewModel() {
     @Inject
     lateinit var adapter: UserAdapter
 
+    @Inject
+    lateinit var errorInterceptor: ErrorInterceptor
+
     private val compositeDisposable by lazy { CompositeDisposable() }
 
     private lateinit var changeSearchQuery: PublishSubject<String>
@@ -33,6 +37,7 @@ class UserViewModel : ViewModel() {
 
     init {
         App.appComponent.inject(this)
+        errorInterceptor.errorListener = { updateState(ApiLimitError(it.docUrl, it.message)) }
     }
 
     fun setOnUserClickListener(onUserClickListener: (User) -> Unit) {
@@ -50,9 +55,7 @@ class UserViewModel : ViewModel() {
                         log("${it.size} initial users were loaded into list")
                     },
                     {
-                        updateState(
-                            NetworkError(0, "Can't load initial users: $it")
-                        )
+                        showNetworkError(0, "Can't load initial users: $it")
                     })
         )
     }
@@ -68,11 +71,9 @@ class UserViewModel : ViewModel() {
                         log("${it.size} new users were loaded into list")
                     },
                     {
-                        updateState(
-                            NetworkError(
-                                adapter.getLastUser()?.id ?: 0,
-                                "Can't load new users: $it"
-                            )
+                        showNetworkError(
+                            adapter.getLastUser()?.id ?: 0,
+                            "Can't load new users: $it"
                         )
                     })
         )
@@ -145,4 +146,9 @@ class UserViewModel : ViewModel() {
         viewState.postValue(newViewState)
     }
 
+    private fun showNetworkError(lastUserId: Long, errorMessage: String) {
+        val state = viewState.value
+        if (state != null && state !is ApiLimitError)
+            updateState(NetworkError(lastUserId, errorMessage))
+    }
 }

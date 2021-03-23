@@ -1,6 +1,7 @@
 package ru.cobalt.githubusers.di.app.modules
 
 import android.content.Context
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import ru.cobalt.githubusers.api.UserApi
@@ -20,4 +21,7 @@ class AppModule(var appContext: Context) {
     fun provideUserRepository(appContext: Context, userApi: UserApi, userDao: UserDao) =
         UserRepository(userApi, userDao)
 
+    @Provides
+    @Singleton
+    fun provideGson(): Gson = Gson()
 }
