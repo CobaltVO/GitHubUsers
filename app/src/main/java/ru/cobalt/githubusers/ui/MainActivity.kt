@@ -121,8 +121,12 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             is Loading -> {
                 userViewModel.showUsersLoader()
             }
+            is Reloading -> {
+                listReloadingProgressBar.visibility = View.VISIBLE
+            }
             is Loaded -> {
                 progressBar.visibility = View.GONE
+                listReloadingProgressBar.visibility = View.GONE
                 listOfUsers.visibility = View.VISIBLE
 
                 recyclerViewScrollListener.isActivated = true

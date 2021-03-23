@@ -4,6 +4,7 @@ sealed class ViewState {
     object Empty : ViewState()
     object Initialization : ViewState()
 
+    object Reloading : ViewState()
     object Loading : ViewState()
     object Loaded : ViewState()
 

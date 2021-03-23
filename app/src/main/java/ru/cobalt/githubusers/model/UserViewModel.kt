@@ -120,6 +120,7 @@ class UserViewModel : ViewModel() {
     fun stopUsersSearch() {
         stopEmitters()
         compositeDisposable.clear()
+        updateState(Reloading)
         adapter.reloadList(adapter.restoreList()) { updateState(Loaded) }
     }
 
