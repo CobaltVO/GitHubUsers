@@ -133,6 +133,7 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                 recyclerViewScrollListener.onDataLoaded()
 
                 userViewModel.hideUsersLoader()
+                hideSearchLoader()
             }
             is Searching -> {
                 recyclerViewScrollListener.isActivated = false
