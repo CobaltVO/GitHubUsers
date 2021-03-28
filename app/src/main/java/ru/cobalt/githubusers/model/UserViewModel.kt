@@ -7,9 +7,9 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import ru.cobalt.githubusers.di.app.App
+import ru.cobalt.githubusers.domain.user.UserInteractor
 import ru.cobalt.githubusers.interceptor.ErrorInterceptor
 import ru.cobalt.githubusers.repo.adapter.UserAdapter
-import ru.cobalt.githubusers.repo.user.UserRepository
 import ru.cobalt.githubusers.ui.ViewState
 import ru.cobalt.githubusers.ui.ViewState.*
 import ru.cobalt.githubusers.ui.listener.OnQueryTextChangeListener
@@ -20,7 +20,7 @@ import javax.inject.Inject
 class UserViewModel : ViewModel() {
 
     @Inject
-    lateinit var userRepository: UserRepository
+    lateinit var userInteractor: UserInteractor
 
     @Inject
     lateinit var adapter: UserAdapter
@@ -47,7 +47,7 @@ class UserViewModel : ViewModel() {
     fun initUsers() {
         updateState(Initialization)
         compositeDisposable.add(
-            userRepository.get(0, 100)
+            userInteractor.get(0, 100)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
@@ -63,7 +63,7 @@ class UserViewModel : ViewModel() {
     fun loadUsers(fromId: Long) {
         updateState(Loading)
         compositeDisposable.add(
-            userRepository.get(fromId, 100)
+            userInteractor.get(fromId, 100)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
@@ -81,7 +81,7 @@ class UserViewModel : ViewModel() {
 
     fun deleteAllUsers() {
         compositeDisposable.add(
-            userRepository.deleteAll()
+            userInteractor.deleteAll()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeOn(Schedulers.io())
                 .subscribe(
@@ -104,7 +104,7 @@ class UserViewModel : ViewModel() {
         compositeDisposable.add(changeSearchQuery
             .debounce(300, TimeUnit.MILLISECONDS)
             .doOnNext { updateState(Searching) }
-            .concatMapSingle { q -> userRepository.search(q) }
+            .concatMapSingle { q -> userInteractor.search(q) }
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {

@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.repo.user
+package ru.cobalt.githubusers.domain.user
 
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -8,7 +8,7 @@ import ru.cobalt.githubusers.model.User
 import ru.cobalt.githubusers.repo.room.UserDao
 import ru.cobalt.githubusers.utils.log
 
-class UserRepository(
+class UserInteractor(
     private val userApi: UserApi,
     private val userDao: UserDao,
 ) {
