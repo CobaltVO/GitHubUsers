@@ -104,7 +104,7 @@ class UserViewModel : ViewModel() {
         compositeDisposable.add(changeSearchQuery
             .debounce(300, TimeUnit.MILLISECONDS)
             .doOnNext { updateState(Searching) }
-            .concatMapSingle { q -> userInteractor.search(q) }
+            .concatMapMaybe { q -> userInteractor.search(q) }
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {

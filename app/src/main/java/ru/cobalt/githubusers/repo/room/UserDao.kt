@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.reactivex.Completable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import ru.cobalt.githubusers.model.User
 
@@ -15,13 +16,13 @@ interface UserDao {
     fun getAll(): Single<List<User>>
 
     @Query("SELECT * FROM users WHERE id > :idFrom LIMIT :count")
-    fun get(idFrom: Long = 0, count: Int = 100): Single<List<User>>
+    fun get(idFrom: Long = 0, count: Int = 100): Maybe<List<User>>
 
     @Query("SELECT * FROM users WHERE login = :login")
-    fun get(login: String): Single<User>
+    fun get(login: String): Maybe<User>
 
     @Query("SELECT * FROM users WHERE login LIKE :likeQuery")
-    fun search(likeQuery: String): Single<List<User>>
+    fun search(likeQuery: String): Maybe<List<User>>
 
     @Query("SELECT COUNT(*) FROM users")
     fun getCount(): Single<Long>

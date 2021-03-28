@@ -18,17 +18,17 @@ class UserInteractor(
             .doOnSuccess { userDao.addSync(it) }
             .doAfterSuccess { log("${it.size} new users were downloaded from server") }
 
-    fun get(idFrom: Long = 0, count: Int = 100): Maybe<List<User>> =
-        Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, count))
-            .filter { list -> list.isNotEmpty() }
-            .firstElement()
+    fun get(idFrom: Long = 0, count: Int = 100): Single<List<User>> =
+        userDao.get(idFrom, count)
+            .filter { it.isNotEmpty() }
+            .switchIfEmpty(downloadAndSave(idFrom, count))
             .subscribeOn(Schedulers.io())
 
-    fun get(login: String): Single<User> =
+    fun get(login: String): Maybe<User> =
         userDao.get(login)
             .subscribeOn(Schedulers.io())
 
-    fun search(query: String): Single<List<User>> =
+    fun search(query: String): Maybe<List<User>> =
         userDao.search("$query%")
             .subscribeOn(Schedulers.io())
 
