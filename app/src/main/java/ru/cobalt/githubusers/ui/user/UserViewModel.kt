@@ -47,7 +47,7 @@ class UserViewModel : ViewModel() {
     fun initUsers() {
         updateState(Initialization)
         compositeDisposable.add(
-            userInteractor.get(0, 100)
+            userInteractor.get()
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {

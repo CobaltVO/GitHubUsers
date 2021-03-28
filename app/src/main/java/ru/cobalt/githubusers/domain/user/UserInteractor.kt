@@ -14,7 +14,7 @@ class UserInteractor(
 ) {
 
     private fun downloadAndSave(): Single<List<User>> =
-        userApi.getAll()
+        userApi.get()
             .doOnSuccess { userDao.addSync(it) }
             .doAfterSuccess { log("${it.size} new users were downloaded from server") }
 

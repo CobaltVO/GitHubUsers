@@ -8,12 +8,9 @@ import ru.cobalt.githubusers.model.User
 interface UserApi {
 
     @GET("users")
-    fun getAll(): Single<List<User>>
-
-    @GET("users")
     fun get(
-        @Query("since") usersFromId: Long,
-        @Query("per_page") usersPerPage: Int,
+        @Query("since") usersFromId: Long = 0,
+        @Query("per_page") usersPerPage: Int = 100,
     ): Single<List<User>>
 
 }
