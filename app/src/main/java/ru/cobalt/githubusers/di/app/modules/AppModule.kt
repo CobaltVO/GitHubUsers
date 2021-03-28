@@ -18,7 +18,7 @@ class AppModule(var appContext: Context) {
 
     @Provides
     @Singleton
-    fun provideUserRepository(appContext: Context, userApi: UserApi, userDao: UserDao) =
+    fun provideUserIntercator(appContext: Context, userApi: UserApi, userDao: UserDao) =
         UserInteractor(userApi, userDao)
 
     @Provides
