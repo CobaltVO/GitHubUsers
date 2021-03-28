@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.ui.user.adapter
+package ru.cobalt.githubusers.ui.user.adapter.holder
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView

@@ -5,6 +5,9 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.User
+import ru.cobalt.githubusers.ui.user.adapter.holder.BaseViewHolder
+import ru.cobalt.githubusers.ui.user.adapter.holder.LoaderViewHolder
+import ru.cobalt.githubusers.ui.user.adapter.holder.UserViewHolder
 import javax.inject.Inject
 
 const val TYPE_USER = 0
