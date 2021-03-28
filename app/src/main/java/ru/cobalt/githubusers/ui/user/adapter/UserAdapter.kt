@@ -1,10 +1,8 @@
 package ru.cobalt.githubusers.ui.user.adapter
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.RecyclerView
-import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.User
 import javax.inject.Inject
@@ -37,18 +35,9 @@ class UserAdapter : RecyclerView.Adapter<BaseViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder =
         when (viewType) {
-            TYPE_USER -> UserViewHolder(
-                LayoutInflater
-                    .from(parent.context)
-                    .inflate(R.layout.item_user, parent, false)
-            )
-            else -> LoaderViewHolder(
-                LayoutInflater
-                    .from(parent.context)
-                    .inflate(R.layout.item_loader, parent, false)
-            )
+            TYPE_USER -> UserViewHolder.getInstance(parent)
+            else -> LoaderViewHolder.getInstance(parent)
         }
-
 
     override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         val user = differ.currentList[position]
