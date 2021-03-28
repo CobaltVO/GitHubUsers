@@ -12,7 +12,7 @@ import javax.inject.Inject
 const val TYPE_USER = 0
 const val TYPE_LOADER = 1
 
-class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class UserAdapter : RecyclerView.Adapter<BaseViewHolder>() {
 
     @Inject
     lateinit var callback: DiffUtilUserCallback
@@ -35,7 +35,7 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         else TYPE_USER
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder =
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder =
         when (viewType) {
             TYPE_USER -> UserViewHolder(
                 LayoutInflater
@@ -50,12 +50,9 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder, position: Int) {
         val user = differ.currentList[position]
-        when (holder) {
-            is UserViewHolder -> holder.bind(user) { onUserClickListener.invoke(user) }
-            is LoaderViewHolder -> holder.bind(user) { onUserClickListener.invoke(user) }
-        }
+        holder.bind(user) { onUserClickListener.invoke(user) }
     }
 
     fun getCurrentList(): List<User> = differ.currentList

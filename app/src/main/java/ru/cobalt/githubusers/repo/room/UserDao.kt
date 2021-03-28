@@ -14,11 +14,8 @@ interface UserDao {
     @Query("SELECT * FROM users")
     fun getAll(): Single<List<User>>
 
-    @Query("SELECT * FROM users LIMIT :count")
-    fun get(count: Long): Single<List<User>>
-
     @Query("SELECT * FROM users WHERE id > :idFrom LIMIT :count")
-    fun get(idFrom: Long, count: Int): Single<List<User>>
+    fun get(idFrom: Long = 0, count: Int = 100): Single<List<User>>
 
     @Query("SELECT * FROM users WHERE login = :login")
     fun get(login: String): Single<User>

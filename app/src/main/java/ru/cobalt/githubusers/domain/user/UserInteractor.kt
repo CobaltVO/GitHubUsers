@@ -13,23 +13,12 @@ class UserInteractor(
     private val userDao: UserDao,
 ) {
 
-    private fun downloadAndSave(): Single<List<User>> =
-        userApi.get()
-            .doOnSuccess { userDao.addSync(it) }
-            .doAfterSuccess { log("${it.size} new users were downloaded from server") }
-
     private fun downloadAndSave(idFrom: Long, count: Int): Single<List<User>> =
         userApi.get(idFrom, count)
             .doOnSuccess { userDao.addSync(it) }
             .doAfterSuccess { log("${it.size} new users were downloaded from server") }
 
-    fun get(): Maybe<List<User>> =
-        Single.concat(userDao.getAll(), downloadAndSave())
-            .filter { list -> list.isNotEmpty() }
-            .firstElement()
-            .subscribeOn(Schedulers.io())
-
-    fun get(idFrom: Long, count: Int): Maybe<List<User>> =
+    fun get(idFrom: Long = 0, count: Int = 100): Maybe<List<User>> =
         Single.concat(userDao.get(idFrom, count), downloadAndSave(idFrom, count))
             .filter { list -> list.isNotEmpty() }
             .firstElement()
