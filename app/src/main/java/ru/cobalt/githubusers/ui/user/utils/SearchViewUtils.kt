@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.ui.utils
+package ru.cobalt.githubusers.ui.user.utils
 
 import android.content.Context
 import android.view.LayoutInflater

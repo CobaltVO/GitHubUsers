@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.ui
+package ru.cobalt.githubusers.ui.user
 
 sealed class ViewState {
     object Empty : ViewState()

@@ -3,7 +3,7 @@ package ru.cobalt.githubusers.di.activity
 import dagger.Component
 import io.reactivex.disposables.CompositeDisposable
 import ru.cobalt.githubusers.di.app.AppComponent
-import ru.cobalt.githubusers.ui.MainActivity
+import ru.cobalt.githubusers.ui.user.MainActivity
 
 @Component(dependencies = [AppComponent::class], modules = [ActivityModule::class])
 @ActivityScope

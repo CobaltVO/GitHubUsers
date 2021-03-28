@@ -15,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.App">
-        <activity android:name="ru.cobalt.githubusers.ui.MainActivity">
+        <activity android:name="ru.cobalt.githubusers.ui.user.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

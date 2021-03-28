@@ -1,9 +1,9 @@
-package ru.cobalt.githubusers.ui.listener
+package ru.cobalt.githubusers.ui.user.listener
 
 import android.content.Context
 import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
-import ru.cobalt.githubusers.model.UserViewModel
+import ru.cobalt.githubusers.ui.user.UserViewModel
 
 class OnMenuStateChangeListener(
     private val context: Context,

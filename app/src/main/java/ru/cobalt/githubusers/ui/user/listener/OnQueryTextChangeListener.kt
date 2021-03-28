@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.ui.listener
+package ru.cobalt.githubusers.ui.user.listener
 
 import android.widget.SearchView
 import io.reactivex.Observer

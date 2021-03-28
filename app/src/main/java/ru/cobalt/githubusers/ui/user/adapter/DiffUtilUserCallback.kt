@@ -1,4 +1,4 @@
-package ru.cobalt.githubusers.repo.adapter
+package ru.cobalt.githubusers.ui.user.adapter
 
 import androidx.recyclerview.widget.DiffUtil
 import ru.cobalt.githubusers.model.User
