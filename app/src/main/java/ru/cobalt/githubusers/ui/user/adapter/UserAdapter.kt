@@ -3,7 +3,6 @@ package ru.cobalt.githubusers.ui.user.adapter
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.model.User
 import ru.cobalt.githubusers.ui.user.adapter.holder.BaseViewHolder
 import ru.cobalt.githubusers.ui.user.adapter.holder.LoaderViewHolder
@@ -18,10 +17,6 @@ class UserAdapter : ListAdapter<User, BaseViewHolder>(DiffUtilUserCallback) {
 
     var onUserClickListener: (User) -> Unit = {}
     var isLoaderActivated: Boolean = true
-
-    init {
-        App.appComponent.inject(this)
-    }
 
     override fun getItemCount(): Int = currentList.size
 
@@ -69,7 +64,7 @@ class UserAdapter : ListAdapter<User, BaseViewHolder>(DiffUtilUserCallback) {
         }
     }
 
-    private object DiffUtilUserCallback: DiffUtil.ItemCallback<User>() {
+    private object DiffUtilUserCallback : DiffUtil.ItemCallback<User>() {
         override fun areItemsTheSame(oldItem: User, newItem: User) = oldItem.id == newItem.id
         override fun areContentsTheSame(oldItem: User, newItem: User) = oldItem == newItem
     }
