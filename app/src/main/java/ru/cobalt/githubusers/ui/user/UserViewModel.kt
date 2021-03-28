@@ -28,12 +28,12 @@ class UserViewModel : ViewModel() {
     @Inject
     lateinit var errorInterceptor: ErrorInterceptor
 
-    private val compositeDisposable by lazy { CompositeDisposable() }
+    private val compositeDisposable = CompositeDisposable()
 
     private lateinit var changeSearchQuery: PublishSubject<String>
-    val queryListener by lazy { OnQueryTextChangeListener() }
+    val queryListener = OnQueryTextChangeListener()
 
-    val viewState: MutableLiveData<ViewState> by lazy { MutableLiveData() }
+    val viewState: MutableLiveData<ViewState> = MutableLiveData()
 
     init {
         App.appComponent.inject(this)
