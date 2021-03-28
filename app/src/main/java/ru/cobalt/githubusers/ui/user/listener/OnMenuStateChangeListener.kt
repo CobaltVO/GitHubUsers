@@ -7,7 +7,7 @@ import ru.cobalt.githubusers.ui.user.UserViewModel
 
 class OnMenuStateChangeListener(
     private val context: Context,
-    private val userViewModel: UserViewModel
+    private val userViewModel: UserViewModel,
 ) : MenuItem.OnActionExpandListener {
 
     private fun showKeyboard(context: Context, item: MenuItem) {

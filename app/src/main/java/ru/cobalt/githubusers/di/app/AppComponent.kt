@@ -21,6 +21,6 @@ import javax.inject.Singleton
 @Singleton
 interface AppComponent {
     val context: Context
+    val userAdapter: UserAdapter
     fun inject(userViewModel: UserViewModel)
-    fun inject(userAdapter: UserAdapter)
 }

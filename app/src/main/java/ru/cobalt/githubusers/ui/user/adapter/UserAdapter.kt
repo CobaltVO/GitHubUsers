@@ -13,8 +13,6 @@ const val TYPE_LOADER = 1
 
 class UserAdapter : ListAdapter<User, BaseViewHolder>(DiffUtilUserCallback) {
 
-    private var savedList: List<User> = listOf()
-
     var onUserClickListener: (User) -> Unit = {}
     var isLoaderActivated: Boolean = true
 
@@ -36,29 +34,9 @@ class UserAdapter : ListAdapter<User, BaseViewHolder>(DiffUtilUserCallback) {
         holder.bind(user) { onUserClickListener.invoke(user) }
     }
 
-    fun reloadList(newList: List<User>, commitCallback: Runnable? = null) =
-        submitList(newList, commitCallback)
-
-    fun updateList(newSubList: List<User>, commitCallback: Runnable? = null) =
-        submitList(currentList + newSubList, commitCallback)
-
-    fun saveList() {
-        savedList = getCurrentList()
-    }
-
-    fun restoreList(): List<User> = savedList
-
     fun getUser(listPosition: Int): User? {
         return try {
             currentList[listPosition]
-        } catch (e: IndexOutOfBoundsException) {
-            null
-        }
-    }
-
-    fun getLastUser(): User? {
-        return try {
-            currentList[currentList.lastIndex]
         } catch (e: IndexOutOfBoundsException) {
             null
         }

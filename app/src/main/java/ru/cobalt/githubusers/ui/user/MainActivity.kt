@@ -18,6 +18,7 @@ import kotlinx.android.synthetic.main.search_progress_bar.view.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
 import ru.cobalt.githubusers.ui.user.ViewState.*
+import ru.cobalt.githubusers.ui.user.adapter.UserAdapter
 import ru.cobalt.githubusers.ui.user.listener.OnMenuStateChangeListener
 import ru.cobalt.githubusers.ui.user.listener.RecyclerViewScrollListener
 import ru.cobalt.githubusers.ui.user.utils.SearchViews
@@ -34,6 +35,9 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
     @Inject
     lateinit var compositeDisposable: CompositeDisposable
+
+    @Inject
+    lateinit var userAdapter: UserAdapter
 
     private lateinit var userViewModel: UserViewModel
     private lateinit var recyclerViewScrollListener: RecyclerViewScrollListener
@@ -98,68 +102,75 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     private fun render(state: ViewState) {
         log("State: $state")
         when (state) {
-            is Empty -> {
-                progressBar.visibility = View.GONE
-                listOfUsers.visibility = View.INVISIBLE
-
-                mainActivityContainer.snack(
-                    R.string.delete_all_users_successful_message,
-                    R.string.delete_all_users_successful_action_button
-                ) {
-                    log("Users reloading was started")
-                    userViewModel.initUsers()
-                }
-            }
             is Initialization -> {
                 progressBar.visibility = View.VISIBLE
                 listOfUsers.visibility = View.INVISIBLE
 
                 recyclerViewScrollListener.isActivated = false
-                userViewModel.showUsersLoader()
+                userAdapter.isLoaderActivated = true
+            }
+            is Cleared -> {
+                userAdapter.submitList(listOf()) {
+                    progressBar.visibility = View.GONE
+                    listOfUsers.visibility = View.INVISIBLE
+
+                    mainActivityContainer.snack(
+                        R.string.delete_all_users_successful_message,
+                        R.string.delete_all_users_successful_action_button
+                    ) {
+                        log("Users reloading was started")
+                        userViewModel.loadUsers()
+                    }
+                }
             }
             is Loading -> {
-                userViewModel.showUsersLoader()
+                userAdapter.isLoaderActivated = true
             }
             is Reloading -> {
                 listReloadingProgressBar.visibility = View.VISIBLE
+                userViewModel.reloadUsers(state.users)
             }
             is Loaded -> {
-                progressBar.visibility = View.GONE
-                listReloadingProgressBar.visibility = View.GONE
-                listOfUsers.visibility = View.VISIBLE
+                userAdapter.submitList(state.users) {
+                    progressBar.visibility = View.GONE
+                    listReloadingProgressBar.visibility = View.GONE
+                    listOfUsers.visibility = View.VISIBLE
 
-                recyclerViewScrollListener.isActivated = true
-                recyclerViewScrollListener.onDataLoaded()
+                    recyclerViewScrollListener.isActivated = true
+                    recyclerViewScrollListener.onDataLoaded()
 
-                userViewModel.hideUsersLoader()
-                hideSearchLoader()
+                    userAdapter.isLoaderActivated = false
+                    hideSearchLoader()
+                }
             }
             is Searching -> {
                 recyclerViewScrollListener.isActivated = false
                 showSearchLoader()
-                userViewModel.hideUsersLoader()
+                userAdapter.isLoaderActivated = false
             }
             is Searched -> {
-                hideSearchLoader()
+                recyclerViewScrollListener.isActivated = false
+                userAdapter.submitList(state.searchedUsers) {
+                    hideSearchLoader()
+                }
             }
             is NetworkError -> {
                 logError("network: ${state.errorMessage}")
                 progressBar.visibility = View.GONE
-                userViewModel.hideUsersLoader()
+                userAdapter.isLoaderActivated = false
 
                 mainActivityContainer.snack(
                     R.string.load_users_error_message,
                     R.string.load_users_error_action_button
                 ) {
                     log("Trying to load users again")
-                    if (state.lastUserId == 0L) userViewModel.initUsers()
-                    else userViewModel.loadUsers(state.lastUserId)
+                    userViewModel.loadUsers(state.lastUserId)
                 }
             }
             is ApiLimitError -> {
                 logError("api limitation: ${state.errorMessage}, docUrl=${state.docUrl}")
                 progressBar.visibility = View.GONE
-                userViewModel.hideUsersLoader()
+                userAdapter.isLoaderActivated = false
 
                 mainActivityContainer.snack(
                     R.string.load_users_api_limit_error_message,
@@ -184,19 +195,21 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     private fun initViewModel(savedInstanceState: Bundle?) {
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
 
-        userViewModel.setOnUserClickListener { openUserProfile(it.userPageUrl) }
+        userAdapter.onUserClickListener = { openUserProfile(it.userPageUrl) }
         userViewModel.viewState.observe(this) { if (it != null) render(it) }
 
-        if (savedInstanceState == null) userViewModel.initUsers()
+        if (savedInstanceState == null) userViewModel.loadUsers()
     }
 
     private fun initRecyclerView() {
-        listOfUsers.adapter = userViewModel.adapter
+        listOfUsers.adapter = userAdapter
 
-        recyclerViewScrollListener = RecyclerViewScrollListener(listOfUsers.layoutManager!!) {
-            val userId = userViewModel.adapter.getUser(it)?.id ?: return@RecyclerViewScrollListener
-            userViewModel.loadUsers(userId)
-        }
+        recyclerViewScrollListener =
+            RecyclerViewScrollListener(listOfUsers.layoutManager!!) { lastPosition ->
+                val userId =
+                    userAdapter.getUser(lastPosition)?.id ?: return@RecyclerViewScrollListener
+                userViewModel.loadUsers(userId)
+            }
         listOfUsers.addOnScrollListener(recyclerViewScrollListener)
     }
 

@@ -11,7 +11,6 @@ import ru.cobalt.githubusers.domain.user.UserInteractor
 import ru.cobalt.githubusers.interceptor.ErrorInterceptor
 import ru.cobalt.githubusers.model.User
 import ru.cobalt.githubusers.ui.user.ViewState.*
-import ru.cobalt.githubusers.ui.user.adapter.UserAdapter
 import ru.cobalt.githubusers.ui.user.listener.OnQueryTextChangeListener
 import ru.cobalt.githubusers.utils.log
 import java.util.concurrent.TimeUnit
@@ -21,9 +20,6 @@ class UserViewModel : ViewModel() {
 
     @Inject
     lateinit var userInteractor: UserInteractor
-
-    @Inject
-    lateinit var adapter: UserAdapter
 
     @Inject
     lateinit var errorInterceptor: ErrorInterceptor
@@ -37,42 +33,25 @@ class UserViewModel : ViewModel() {
 
     init {
         App.appComponent.inject(this)
-        errorInterceptor.errorListener = { updateState(ApiLimitError(it.docUrl, it.message)) }
+        errorInterceptor.errorListener =
+            { updateState(ApiLimitError(getCurrentUsers(), it.message, it.docUrl)) }
     }
 
-    fun setOnUserClickListener(onUserClickListener: (User) -> Unit) {
-        adapter.onUserClickListener = onUserClickListener
-    }
+    fun loadUsers(fromId: Long = 0, count: Int = 100) {
+        if (fromId == 0L) updateState(Initialization)
+        else updateState(Loading(getCurrentUsers()))
 
-    fun initUsers() {
-        updateState(Initialization)
         compositeDisposable.add(
-            userInteractor.get()
+            userInteractor.get(fromId, count)
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                     {
-                        adapter.reloadList(it) { updateState(Loaded) }
-                        log("${it.size} initial users were loaded into list")
-                    },
-                    {
-                        showNetworkError(0, "Can't load initial users: $it")
-                    })
-        )
-    }
-
-    fun loadUsers(fromId: Long) {
-        updateState(Loading)
-        compositeDisposable.add(
-            userInteractor.get(fromId, 100)
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                    {
-                        adapter.updateList(it) { updateState(Loaded) }
-                        log("${it.size} new users were loaded into list")
+                        updateState(Loaded(getCurrentUsers() + it))
+                        log("${it.size} users were loaded into list")
                     },
                     {
                         showNetworkError(
-                            adapter.getLastUser()?.id ?: 0,
+                            getCurrentUsers().lastOrNull()?.id ?: 0,
                             "Can't load new users: $it"
                         )
                     })
@@ -86,12 +65,12 @@ class UserViewModel : ViewModel() {
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     {
-                        adapter.reloadList(listOf()) { updateState(Empty) }
+                        updateState(Cleared)
                         log("Database was cleared")
                     },
                     {
                         updateState(
-                            DatabaseError("Can't clear database: $it")
+                            DatabaseError(getCurrentUsers(), "Can't clear database: $it")
                         )
                     }
                 )
@@ -100,19 +79,18 @@ class UserViewModel : ViewModel() {
 
     fun startUsersSearch() {
         startEmitters()
-        adapter.saveList()
         compositeDisposable.add(changeSearchQuery
             .debounce(300, TimeUnit.MILLISECONDS)
-            .doOnNext { updateState(Searching) }
+            .doOnNext { updateState(Searching(getCurrentUsers())) }
             .concatMapMaybe { q -> userInteractor.search(q) }
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
-                    adapter.reloadList(it) { updateState(Searched) }
+                    updateState(Searched(getCurrentUsers(), it))
                     log("${it.size} GitHub users were found by user's query")
                 },
                 {
-                    updateState(SearchError("Unable to search users: $it"))
+                    updateState(SearchError(getCurrentUsers(), "Unable to search users: $it"))
                 }
             )
         )
@@ -121,16 +99,11 @@ class UserViewModel : ViewModel() {
     fun stopUsersSearch() {
         stopEmitters()
         compositeDisposable.clear()
-        updateState(Reloading)
-        adapter.reloadList(adapter.restoreList()) { updateState(Loaded) }
+        updateState(Reloading(getCurrentUsers()))
     }
 
-    fun showUsersLoader() {
-        adapter.isLoaderActivated = true
-    }
-
-    fun hideUsersLoader() {
-        adapter.isLoaderActivated = false
+    fun reloadUsers(users: List<User>) {
+        updateState(Loaded(users))
     }
 
     private fun startEmitters() {
@@ -146,9 +119,11 @@ class UserViewModel : ViewModel() {
         viewState.postValue(newViewState)
     }
 
+    private fun getCurrentUsers(): List<User> = viewState.value?.users ?: listOf()
+
     private fun showNetworkError(lastUserId: Long, errorMessage: String) {
         val state = viewState.value
         if (state != null && state !is ApiLimitError)
-            updateState(NetworkError(lastUserId, errorMessage))
+            updateState(NetworkError(getCurrentUsers(), errorMessage, lastUserId))
     }
 }
