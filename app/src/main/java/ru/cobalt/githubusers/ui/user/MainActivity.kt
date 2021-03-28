@@ -17,8 +17,10 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.search_progress_bar.view.*
 import ru.cobalt.githubusers.R
 import ru.cobalt.githubusers.di.app.App
+import ru.cobalt.githubusers.model.utils.toUserViewType
 import ru.cobalt.githubusers.ui.user.ViewState.*
 import ru.cobalt.githubusers.ui.user.adapter.UserAdapter
+import ru.cobalt.githubusers.ui.user.adapter.ViewType
 import ru.cobalt.githubusers.ui.user.listener.OnMenuStateChangeListener
 import ru.cobalt.githubusers.ui.user.listener.RecyclerViewScrollListener
 import ru.cobalt.githubusers.ui.user.utils.SearchViews
@@ -107,7 +109,6 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                 listOfUsers.visibility = View.INVISIBLE
 
                 recyclerViewScrollListener.isActivated = false
-                userAdapter.isLoaderActivated = true
             }
             is Cleared -> {
                 userAdapter.submitList(listOf()) {
@@ -124,14 +125,14 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                 }
             }
             is Loading -> {
-                userAdapter.isLoaderActivated = true
+                userAdapter.submitList(state.users.toUserViewType() + ViewType.LoaderViewType)
             }
             is Reloading -> {
                 listReloadingProgressBar.visibility = View.VISIBLE
                 userViewModel.reloadUsers(state.users)
             }
             is Loaded -> {
-                userAdapter.submitList(state.users) {
+                userAdapter.submitList(state.users.toUserViewType()) {
                     progressBar.visibility = View.GONE
                     listReloadingProgressBar.visibility = View.GONE
                     listOfUsers.visibility = View.VISIBLE
@@ -139,25 +140,21 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
                     recyclerViewScrollListener.isActivated = true
                     recyclerViewScrollListener.onDataLoaded()
 
-                    userAdapter.isLoaderActivated = false
                     hideSearchLoader()
                 }
             }
             is Searching -> {
                 recyclerViewScrollListener.isActivated = false
                 showSearchLoader()
-                userAdapter.isLoaderActivated = false
             }
             is Searched -> {
                 recyclerViewScrollListener.isActivated = false
-                userAdapter.submitList(state.searchedUsers) {
-                    hideSearchLoader()
-                }
+                userAdapter.submitList(state.searchedUsers.toUserViewType()) { hideSearchLoader() }
             }
             is NetworkError -> {
                 logError("network: ${state.errorMessage}")
+                userAdapter.submitList(state.users.toUserViewType())
                 progressBar.visibility = View.GONE
-                userAdapter.isLoaderActivated = false
 
                 mainActivityContainer.snack(
                     R.string.load_users_error_message,
@@ -169,8 +166,8 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
             }
             is ApiLimitError -> {
                 logError("api limitation: ${state.errorMessage}, docUrl=${state.docUrl}")
+                userAdapter.submitList(state.users.toUserViewType())
                 progressBar.visibility = View.GONE
-                userAdapter.isLoaderActivated = false
 
                 mainActivityContainer.snack(
                     R.string.load_users_api_limit_error_message,
@@ -195,7 +192,9 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
     private fun initViewModel(savedInstanceState: Bundle?) {
         userViewModel = ViewModelProviders.of(this).get(UserViewModel::class.java)
 
-        userAdapter.onUserClickListener = { openUserProfile(it.userPageUrl) }
+        userAdapter.onViewClickListener = {
+            if (it is ViewType.UserViewType) openUserProfile(it.user.userPageUrl)
+        }
         userViewModel.viewState.observe(this) { if (it != null) render(it) }
 
         if (savedInstanceState == null) userViewModel.loadUsers()
@@ -206,9 +205,10 @@ class MainActivity : AppCompatActivity(R.layout.main_activity) {
 
         recyclerViewScrollListener =
             RecyclerViewScrollListener(listOfUsers.layoutManager!!) { lastPosition ->
-                val userId =
-                    userAdapter.getUser(lastPosition)?.id ?: return@RecyclerViewScrollListener
-                userViewModel.loadUsers(userId)
+                val viewType =
+                    userAdapter.getViewType(lastPosition) ?: return@RecyclerViewScrollListener
+                if (viewType is ViewType.UserViewType)
+                    userViewModel.loadUsers(viewType.user.id)
             }
         listOfUsers.addOnScrollListener(recyclerViewScrollListener)
     }
